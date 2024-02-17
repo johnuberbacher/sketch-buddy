@@ -43,15 +43,23 @@ const CanvasTools = ({ onStrokeSizeChange }) => {
           <TouchableOpacity
             key={stroke}
             onPress={() => handleStrokeSizeSelect(stroke)}
-            style={[
-              styles.box,
-              {
-                height: stroke,
-                width: stroke,
-              },
-            ]}
-          />
+            style={styles.box}>
+            <View
+              style={[
+                styles.stroke,
+                {
+                  height: stroke,
+                  width: stroke,
+                },
+              ]}></View>
+          </TouchableOpacity>
         ))}
+        <TouchableOpacity
+          onPress={() => null}
+          style={styles.box}>
+          <View
+            style={{}}></View>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -59,13 +67,20 @@ const CanvasTools = ({ onStrokeSizeChange }) => {
 
 const styles = StyleSheet.create({
   box: {
+    backgroundColor: "white",
     borderRadius: 100,
     borderWidth: 4,
     borderColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
     width: 30,
     height: 30,
     elevation: 2,
     margin: 15,
+  },
+  stroke: {
+    borderRadius: 100,
+    backgroundColor: "black",
   },
   buttonBackground: {
     flex: 1,

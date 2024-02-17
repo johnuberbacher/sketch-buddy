@@ -13,6 +13,7 @@ import Menu from "./screens/Menu";
 import Nav from "./components/Nav";
 import AudioPlayer from "./util/AudioPlayer";
 import { NavigationContainer } from "@react-navigation/native";
+import { TransitionPresets } from "@react-navigation/stack";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import COLORS from "./constants/colors";
 
@@ -24,12 +25,11 @@ const App = () => {
   });
 
   if (Platform.OS === "android") {
-    StatusBar.setBackgroundColor(COLORS.primary); // Set your desired color
+    StatusBar.setBackgroundColor(COLORS.primary); 
   }
-
-  // Set status bar text color for iOS
+  
   if (Platform.OS === "ios") {
-    StatusBar.setBarStyle("light-content"); // Set 'dark-content' for light background
+    StatusBar.setBarStyle("light-content"); 
   }
 
   console.log("isLoaded:", isLoaded);
@@ -71,7 +71,10 @@ const App = () => {
         }}>
         <AudioPlayer source={require("./assets/music/music01.mp3")} />
         <View style={{ flex: 1, position: "relative", maxWidth: 600 }}>
-          <Stack.Navigator>
+          <Stack.Navigator
+            screenOptions={{
+              animation: 'slide_from_right',
+            }}>
             <Stack.Screen name="Landing" component={Landing} />
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="Draw" component={Draw} />

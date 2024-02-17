@@ -31,7 +31,7 @@ const Button = (props) => {
   };
   const buttonInnerStyles = StyleSheet.flatten([
     styles.buttonInner,
-    isPressed && !props.selected && styles.buttonInnerPressed, // Apply pressed styles only if not selected
+    isPressed && !props.selected && styles.buttonInnerPressed,
     props.selected && styles.buttonInnerSelected,
     {
       height: props.buttonSize || 60,
@@ -41,7 +41,7 @@ const Button = (props) => {
 
   const buttonOuterStyles = StyleSheet.flatten([
     styles.buttonOuter,
-    isPressed && !props.selected && styles.buttonOuterPressed, // Apply pressed styles only if not selected
+    isPressed && !props.selected && styles.buttonOuterPressed,
     props.selected && styles.buttonOuterSelected,
     {
       backgroundColor: props.selected ? props.selected : darkColor,

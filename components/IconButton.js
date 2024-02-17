@@ -15,16 +15,14 @@ const Button = (props) => {
     iconLibrary = "Feather",
   } = props;
 
-  // Manually handle different icon libraries
   let IconComponent;
   switch (iconLibrary) {
     case "Feather":
       IconComponent = Feather;
       break;
-    // Add more cases for other icon libraries if needed
 
     default:
-      IconComponent = Feather; // Default to Feather if no valid icon library is provided
+      IconComponent = Feather; 
       break;
   }
 
@@ -41,7 +39,7 @@ const Button = (props) => {
   };
   const buttonInnerStyles = StyleSheet.flatten([
     styles.buttonInner,
-    isPressed && !props.selected && styles.buttonInnerPressed, // Apply pressed styles only if not selected
+    isPressed && !props.selected && styles.buttonInnerPressed,
     props.selected && styles.buttonInnerSelected,
     {
       backgroundColor: props.selected ? props.selected : baseColor,
@@ -50,7 +48,7 @@ const Button = (props) => {
 
   const buttonOuterStyles = StyleSheet.flatten([
     styles.buttonOuter,
-    isPressed && !props.selected && styles.buttonOuterPressed, // Apply pressed styles only if not selected
+    isPressed && !props.selected && styles.buttonOuterPressed, 
     props.selected && styles.buttonOuterSelected,
     {
       backgroundColor: props.selected ? props.selected : darkColor,
@@ -64,7 +62,7 @@ const Button = (props) => {
       disabled={props.selected}
       onPress={() => {
         if (props.onPress) {
-          props.onPress(); // Call the onPress handler from the parent component
+          props.onPress();
         }
       }}
       onPressIn={handlePressIn}

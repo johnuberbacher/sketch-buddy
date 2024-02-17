@@ -14,12 +14,12 @@ import FlatButton from "./FlatButton";
 import COLORS from "../constants/colors";
 import { useNavigation } from "@react-navigation/native";
 
-const Canvas = () => {
+const Canvas = ({onSubmitDraw, word}) => {
   const [paths, setPaths] = useState([]);
   const [currentPath, setCurrentPath] = useState([]);
   const startPointRef = useRef({ x: 0, y: 0 });
-  const [selectedColor, setSelectedColor] = useState("#000000"); // Initial color
-  const [selectedStrokeSize, setSelectedStrokeSize] = useState(8); // Initial color
+  const [selectedColor, setSelectedColor] = useState("#000000"); 
+  const [selectedStrokeSize, setSelectedStrokeSize] = useState(8);
   const [eraserActive, setEraserActive] = useState(false);
   const navigation = useNavigation();
 
@@ -29,7 +29,7 @@ const Canvas = () => {
     });
   }, [navigation]);
 
-  const staticword = "spider";
+  const staticword = word;
 
   const smoothPath = (path) => {
     if (path.length < 2) return path;
@@ -88,11 +88,12 @@ const Canvas = () => {
   };
 
   const handleGestureEnd = () => {
-    // You can perform any action when the drawing is completed
+    // null
   };
 
-  const toggleEraser = () => {
-    setEraserActive((prev) => !prev);
+  const submitDrawing = () => {
+    onSubmitDraw();
+    console.log("made it here")
   };
 
   return (
@@ -245,13 +246,7 @@ const Canvas = () => {
           justifyContent: "stretch",
           paddingTop: 20,
         }}>
-        <Button
-          color="yellow"
-          title="DONE"
-          onPress={() => {
-            navigation.navigate("Guess");
-          }}
-        />
+        <Button color="yellow" title="DONE" onPress={submitDrawing} />
       </View>
     </View>
   );

@@ -22,7 +22,7 @@ const LetterButton = (props) => {
   };
   const buttonInnerStyles = StyleSheet.flatten([
     styles.buttonInner,
-    isPressed && !props.selected && styles.buttonInnerPressed, // Apply pressed styles only if not selected
+    isPressed && !props.selected && styles.buttonInnerPressed,
     props.selected && styles.buttonInnerSelected,
     {
       
@@ -32,7 +32,7 @@ const LetterButton = (props) => {
   
   const buttonOuterStyles = StyleSheet.flatten([
     styles.buttonOuter,
-    isPressed && !props.selected && styles.buttonOuterPressed, // Apply pressed styles only if not selected
+    isPressed && !props.selected && styles.buttonOuterPressed,
     props.selected && styles.buttonOuterSelected,
     {
       backgroundColor: props.selected ? props.selected : darkColor,
@@ -46,7 +46,7 @@ const LetterButton = (props) => {
       disabled={props.selected}
       onPress={() => {
         if (props.onPress) {
-          props.onPress(); // Call the onPress handler from the parent component
+          props.onPress();
         }
       }}
       onPressIn={handlePressIn}

@@ -7,7 +7,7 @@ import {
   Pressable,
   Image,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import Nav from "../components/Nav";
 import Canvas from "../components/Canvas";
 import LetterBoard from "../components/LetterBoard";
@@ -17,9 +17,11 @@ import COLORS from "../constants/colors";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import { useLayoutEffect } from "react";
+import ConfirmDialog from "../components/ConfirmDialog";
 
-const Draw = (route, navigation) => {
-  const navigation = useNavigation();
+const Draw = ({ route, navigation }) => {
+  const [isConfirmDialogVisible, setIsConfirmDialogVisible] = useState(false);
+  const { word } = route.params;
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -27,11 +29,25 @@ const Draw = (route, navigation) => {
     });
   }, [navigation]);
 
-  const { word } = route.params;
-  console.log("word:", word);
+  const toggleConfirmDialogVisible = () => {
+    setIsConfirmDialogVisible(!isConfirmDialogVisible);
+  };
+
+  const submitDrawing = () => {
+    console.log("YOOOO")
+    toggleConfirmDialogVisible();
+  };
+
+  const onConfirmDialog = () => {
+    setIsConfirmDialogVisible(false);
+    navigation.navigate("Home");
+  };
 
   return (
     <>
+      {isConfirmDialogVisible && (
+        <ConfirmDialog  onClose={() => onConfirmDialog()} />
+      )}
       <View
         style={{
           flex: 1,
@@ -39,8 +55,7 @@ const Draw = (route, navigation) => {
           justifyContent: "flex-start",
           alignItems: "center",
         }}>
-        <Text>{word}</Text>
-        <Canvas />
+        <Canvas onSubmitDraw={submitDrawing} word={word} />
       </View>
     </>
   );

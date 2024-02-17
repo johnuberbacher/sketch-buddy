@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
 import Button from "../components/Button";
+import React, {useRef, useEffect} from "react";
 
-const Settings = (props) => {
+const ConfirmDialog = (props) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -29,7 +29,7 @@ const Settings = (props) => {
         <View style={styles.overlayOuter}>
           <View style={styles.overlayInner}>
             <Text selectable={false} style={styles.overlayTitle}>
-              Settings
+              Your drawing was sent to juberbacher!
             </Text>
             <View
               style={{
@@ -51,23 +51,7 @@ const Settings = (props) => {
                     flexDirection: "row",
                     marginTop: 30,
                   }}>
-                  <Button title="Mute" />
-                </View>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "row",
-                    marginTop: 30,
-                  }}>
-                  <Button title="Logout" />
-                </View>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "row",
-                    marginTop: 30,
-                  }}>
-                  <Button title="Close" onPress={onClose} />
+                  <Button title="Okay" onPress={onClose} />
                 </View>
               </View>
             </View>
@@ -122,10 +106,9 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.25)",
     textShadowOffset: { width: 0, height: 4 },
     textShadowRadius: 2,
-    textTransform: "uppercase",
     textAlign: "center",
     marginBottom: 20,
   },
 });
 
-export default Settings;
+export default ConfirmDialog;

@@ -20,16 +20,14 @@ const FlatButton = (props) => {
 
   const { iconName = "settings", iconSize = 30, iconColor = "white", iconLibrary = "Feather" } = props;
 
-  // Manually handle different icon libraries
   let IconComponent;
   switch (iconLibrary) {
     case "Feather":
       IconComponent = Feather;
       break;
-    // Add more cases for other icon libraries if needed
 
     default:
-      IconComponent = Feather; // Default to Feather if no valid icon library is provided
+      IconComponent = Feather; 
       break;
   }
 
