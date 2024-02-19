@@ -1,10 +1,24 @@
 import { View, ImageBackground, Text, StyleSheet } from "react-native";
 import Button from "../components/Button";
-import React, { useLayoutEffect } from "react";
+import { useState, useEffect } from 'react'
 import COLORS from "../constants/colors";
 import { useNavigation } from "@react-navigation/native";
+import { supabase } from './lib/supabase'
+import { Session } from '@supabase/supabase-js'
 
 const Landing = (props) => {
+  const [session, setSession] = useState<Session | null>(null)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+  }, [])
+
   const navigation = useNavigation();
 
   useLayoutEffect(() => {

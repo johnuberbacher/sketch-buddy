@@ -16,10 +16,14 @@ import { NavigationContainer } from "@react-navigation/native";
 import { TransitionPresets } from "@react-navigation/stack";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import COLORS from "./constants/colors";
+import { supabase } from './lib/supabase'
+import { Session } from '@supabase/supabase-js'
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
+  const [session, setSession] = useState<Session | null>(null)
+
   const [isLoaded] = Font.useFonts({
     "TitanOne-Regular": require("./assets/fonts/TitanOne-Regular.ttf"),
   });
@@ -27,12 +31,10 @@ const App = () => {
   if (Platform.OS === "android") {
     StatusBar.setBackgroundColor(COLORS.primary); 
   }
-  
+
   if (Platform.OS === "ios") {
     StatusBar.setBarStyle("light-content"); 
   }
-
-  console.log("isLoaded:", isLoaded);
 
   const onLayoutRootView = useCallback(async () => {
     if (isLoaded) {
@@ -55,6 +57,19 @@ const App = () => {
   if (!isLoaded) {
     return null;
   }
+  
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+  }, [])
+
+  console.log("isLoaded:", isLoaded);
 
   return (
     <NavigationContainer

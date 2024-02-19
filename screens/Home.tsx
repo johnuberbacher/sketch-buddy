@@ -7,8 +7,9 @@ import {
   Pressable,
   Image,
   StyleSheet,
+  FlatList,
 } from "react-native";
-import React, { useLayoutEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import Nav from "../components/Nav";
 import Canvas from "../components/Canvas";
 import LetterBoard from "../components/LetterBoard";
@@ -63,6 +64,11 @@ const Home = () => {
               </Text>
             </View>
 
+            <FlatList
+              data={data}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => <Text>{JSON.stringify(item)}</Text>}
+            />
             <View style={styles.menuInner}>
               <View
                 style={{
