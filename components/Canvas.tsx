@@ -8,28 +8,32 @@ import {
 import { ScrollView, StyleSheet, View, Text } from "react-native";
 import ColorPicker from "./ColorPicker";
 import Button from "./Button";
+import NewButton from "./NewButton";
 import CanvasTools from "./CanvasTools";
 import Avatar from "./Avatar";
 import FlatButton from "./FlatButton";
 import COLORS from "../constants/colors";
 import { useNavigation } from "@react-navigation/native";
+import ViewShot from "react-native-view-shot";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 
-const Canvas = ({onSubmitDraw, word}) => {
+const Canvas = ({ onSubmitDraw, word }) => {
   const [paths, setPaths] = useState([]);
   const [currentPath, setCurrentPath] = useState([]);
   const startPointRef = useRef({ x: 0, y: 0 });
-  const [selectedColor, setSelectedColor] = useState("#000000"); 
+  const [selectedColor, setSelectedColor] = useState("#000000");
   const [selectedStrokeSize, setSelectedStrokeSize] = useState(8);
   const [eraserActive, setEraserActive] = useState(false);
   const navigation = useNavigation();
+  const viewShotRef = useRef<ViewShot>(null);
+  const staticword = word;
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, [navigation]);
-
-  const staticword = word;
 
   const smoothPath = (path) => {
     if (path.length < 2) return path;
@@ -75,6 +79,10 @@ const Canvas = ({onSubmitDraw, word}) => {
     }
   };
 
+  const handleGestureEnd = () => {
+    // null
+  };
+
   const handleStrokeSizeChange = (stroke) => {
     if (!eraserActive) {
       setSelectedStrokeSize(stroke);
@@ -87,13 +95,28 @@ const Canvas = ({onSubmitDraw, word}) => {
     }
   };
 
-  const handleGestureEnd = () => {
-    // null
+  const handleClearCanvas = () => {
+    setPaths([]);
   };
+
+  const handleSaveDrawing = async () => {
+      try {
+        const uri = await viewShotRef.current.capture();
+        const fileUri = `${FileSystem.documentDirectory}capturedImage.png`;
+        await FileSystem.moveAsync({
+          from: uri,
+          to: fileUri,
+        });
+        await MediaLibrary.saveToLibraryAsync(uri);
+        console.log('Image saved:', fileUri);
+      } catch (error) {
+        console.error('Error capturing and saving image:', error);
+      }
+    };
 
   const submitDrawing = () => {
     onSubmitDraw();
-    console.log("made it here")
+    console.log("made it here");
   };
 
   return (
@@ -120,21 +143,35 @@ const Canvas = ({onSubmitDraw, word}) => {
             justifyContent: "flex-start",
             gap: 15,
           }}>
-          <View
-            style={{
-              aspectRatio: 1,
-              backgroundColor: COLORS.yellow,
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
+          <View style={{ padding: 10, backgroundColor: COLORS.secondary }}>
             <View
               style={{
-                width: 40,
                 flexDirection: "column",
+                height: "100%",
+                flex: 1,
+                width: "auto",
+                aspectRatio: 1,
                 alignItems: "center",
                 justifyContent: "center",
+                position: "relative",
               }}>
+              <View
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  right: -3,
+                  zIndex: 1,
+                  elevation: 1,
+                }}>
+                <Text
+                  style={{
+                    fontSize: 20,
+                    textAlign: "center",
+                  }}
+                  selectable={false}>
+                  🇺🇸
+                </Text>
+              </View>
               <Avatar />
             </View>
           </View>
@@ -151,10 +188,10 @@ const Canvas = ({onSubmitDraw, word}) => {
                 style={{
                   paddingTop: 15,
                   fontSize: 16,
-                  fontFamily: "TitanOne-Regular",
+                  fontFamily: "Kanit-Regular",
                   color: "white",
                   textShadowColor: "rgba(0, 0, 0, 0.25)",
-                  textShadowOffset: { width: 0, height: 3 },
+                  textShadowOffset: { width: 0, height: 2 },
                   textShadowRadius: 4,
                 }}>
                 You are drawing
@@ -165,10 +202,10 @@ const Canvas = ({onSubmitDraw, word}) => {
                   textTransform: "uppercase",
                   paddingTop: 15,
                   fontSize: 16,
-                  fontFamily: "TitanOne-Regular",
+                  fontFamily: "Kanit-SemiBold",
                   color: "white",
                   textShadowColor: "rgba(0, 0, 0, 0.25)",
-                  textShadowOffset: { width: 0, height: 3 },
+                  textShadowOffset: { width: 0, height: 2 },
                   textShadowRadius: 4,
                 }}>
                 {" "}
@@ -180,10 +217,10 @@ const Canvas = ({onSubmitDraw, word}) => {
               style={{
                 paddingBottom: 15,
                 fontSize: 16,
-                fontFamily: "TitanOne-Regular",
+                fontFamily: "Kanit-Regular",
                 color: "white",
                 textShadowColor: "rgba(0, 0, 0, 0.25)",
-                textShadowOffset: { width: 0, height: 3 },
+                textShadowOffset: { width: 0, height: 2 },
                 textShadowRadius: 4,
               }}>
               for juberbacher
@@ -201,52 +238,61 @@ const Canvas = ({onSubmitDraw, word}) => {
         </View>
       </View>
 
-      <View style={styles.container}>
-        <GestureHandlerRootView style={{ flex: 1, width: "100%" }}>
-          <PanGestureHandler
-            onGestureEvent={handleGestureEvent}
-            onHandlerStateChange={handleGestureStateChange}
-            onEnded={handleGestureEnd}
-            style={{ flex: 1, height: "100%" }}>
-            <Svg style={styles.svgContainer}>
-              {paths.map((pathObject, pathIndex) => (
-                <Path
-                  key={pathObject + pathIndex}
-                  d={pathObject.path.join(" ")}
-                  stroke={eraserActive ? "#fff" : pathObject.color}
-                  strokeWidth={pathObject.strokeSize}
-                  strokeLinecap="round"
-                  fill="none"
-                />
-              ))}
-              {currentPath.length > 1 && (
-                <Path
-                  d={smoothPath(currentPath).join(" ")}
-                  stroke={eraserActive ? "#fff" : selectedColor}
-                  strokeWidth={eraserActive ? 12 : selectedStrokeSize}
-                  strokeLinecap="round"
-                  fill="none"
-                />
-              )}
-            </Svg>
-          </PanGestureHandler>
-        </GestureHandlerRootView>
-      </View>
+      <ViewShot
+        ref={viewShotRef}
+        options={{ format: "png", quality: 1 }}
+        style={{ flex: 1, height: "100%" }}>
+        <View style={styles.container}>
+          <GestureHandlerRootView style={{ flex: 1, width: "100%" }}>
+            <PanGestureHandler
+              onGestureEvent={handleGestureEvent}
+              onHandlerStateChange={handleGestureStateChange}
+              onEnded={handleGestureEnd}
+              style={{ flex: 1, height: "100%" }}>
+              <Svg style={styles.svgContainer}>
+                {paths.map((pathObject, pathIndex) => (
+                  <Path
+                    key={pathObject + pathIndex}
+                    d={pathObject.path.join(" ")}
+                    stroke={eraserActive ? "#fff" : pathObject.color}
+                    strokeWidth={pathObject.strokeSize}
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                ))}
+                {currentPath.length > 1 && (
+                  <Path
+                    d={smoothPath(currentPath).join(" ")}
+                    stroke={eraserActive ? "#fff" : selectedColor}
+                    strokeWidth={eraserActive ? 12 : selectedStrokeSize}
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                )}
+              </Svg>
+            </PanGestureHandler>
+          </GestureHandlerRootView>
+        </View>
+      </ViewShot>
 
       <ColorPicker onColorChange={handleColorChange} />
-      <CanvasTools onStrokeSizeChange={handleStrokeSizeChange} />
+      <CanvasTools
+        onSaveDrawing={handleSaveDrawing}
+        onClearCanvas={handleClearCanvas}
+        onStrokeSizeChange={handleStrokeSizeChange}
+      />
 
       <View
         style={{
           height: "auto",
           width: "100%",
-          padding: 10,
+          padding: 20,
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "stretch",
-          paddingTop: 20,
+          gap: 20,
         }}>
-        <Button color="yellow" title="DONE" onPress={submitDrawing} />
+        <NewButton color="secondary" title="Continue" onPress={submitDrawing} />
       </View>
     </View>
   );

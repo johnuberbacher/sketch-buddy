@@ -27,7 +27,13 @@
             ]
           }
         ]
-      ]
+      ],
+      "android": {
+        "permissions": ["WRITE_EXTERNAL_STORAGE"]
+      },
+      "ios": {
+        "permissions": ["NSPhotoLibraryAddUsageDescription"]
+      }
     },
     "ios": {
       "supportsTablet": true

@@ -1,27 +1,36 @@
 import {
-  SafeAreaView,
-  Platform,
-  StatusBar,
+  ScrollView,
   View,
   Text,
-  Pressable,
-  Image,
+  ActivityIndicator,
   StyleSheet,
-  FlatList,
+  ImageBackground,
 } from "react-native";
+import { supabase } from "../lib/supabase";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import Nav from "../components/Nav";
-import Canvas from "../components/Canvas";
-import LetterBoard from "../components/LetterBoard";
-import Button from "../components/Button";
-import IconButton from "../components/IconButton";
-import FlatButton from "../components/FlatButton";
+import NewButton from "../components/NewButton";
 import COLORS from "../constants/colors";
 import Avatar from "../components/Avatar";
 import { useNavigation } from "@react-navigation/native";
+import { Session } from "@supabase/supabase-js";
+import ChooseWord from "../components/ChooseWord";
+import Modal from "../components/Modal";
 
-const Home = () => {
+export default function Home() {
+  const [loading, setLoading] = useState(true);
+  const [remoteData, setRemoteData] = useState([]);
+  const [username, setUsername] = useState("juberbacher");
   const navigation = useNavigation();
+  const [isChooseWordVisibleModal, setIsChooseWordModalVisible] =
+    useState(false);
+
+  const toggleChooseWordModalVisibility = () => {
+    setIsChooseWordModalVisible(!isChooseWordVisibleModal);
+  };
+
+  // fetch games where user1 or user2 === username
+  //
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -29,378 +38,339 @@ const Home = () => {
     });
   }, [navigation]);
 
+  useEffect(() => {
+    //  if (session) getProfile();
+    getProfile();
+  }, []);
+
+  async function getProfile() {
+    try {
+      setLoading(true);
+      console.log("Fetching data from 'games' table...");
+
+      const { data, error, status } = await supabase.from("games").select("*");
+
+      if (error && status !== 406) {
+        console.error("Error fetching data:", error);
+        throw error;
+      }
+
+      if (data) {
+        console.log("Data fetched successfully:", data);
+        setRemoteData(data);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error in getProfile:", error.message);
+        alert(error.message);
+      }
+    } finally {
+      setLoading(false);
+      console.log("Loading state set to false.");
+    }
+  }
+
   return (
     <>
-      <Nav />
-      <View
-        style={{
-          paddingVertical: 20,
-          paddingHorizontal: 15,
-          width: "100%",
-          gap: 20,
-          flexDirection: "column",
-          maxWidth: 600,
-          marginHorizontal: "auto",
-        }}>
+      {loading ? (
         <View
           style={{
-            paddingTop: 10,
+            flex: 1,
+            backgroundColor: COLORS.secondary,
             width: "100%",
-            flexDirection: "row",
+            height: "100%",
+            gap: 20,
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
           }}>
-          <Button
-            color="green"
-            title="Create Game"
-            onPress={() => {
-              navigation.navigate("Menu");
-            }}
+          <ActivityIndicator
+            size="large"
+            color="white"
+            style={{ transform: [{ scale: 2 }] }}
           />
         </View>
-        <View style={styles.menuOuter}>
-          <View style={styles.menu}>
-            <View style={styles.menuTitle}>
-              <Text selectable={false} style={styles.textYourMove}>
-                Your Games
+      ) : (
+        <>
+          <Nav />
+          {isChooseWordVisibleModal && (
+            <Modal props="" title="Choose a word to draw">
+              <ChooseWord onClose={() => toggleChooseWordModalVisibility()} />
+            </Modal>
+          )}
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: COLORS.secondary,
+              width: "100%",
+              gap: 20,
+              flexDirection: "column",
+            }}>
+            <View
+              style={{
+                paddingHorizontal: 20,
+              }}>
+              <Text
+                style={{
+                  fontSize: 34,
+                  fontFamily: "Kanit-Bold",
+                  color: COLORS.text,
+                }}>
+                Let's Play
               </Text>
             </View>
-
-            <FlatList
-              data={data}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => <Text>{JSON.stringify(item)}</Text>}
-            />
-            <View style={styles.menuInner}>
+            <View style={styles.menu}>
               <View
                 style={{
                   width: "100%",
+                  backgroundColor: "white",
+                  paddingVertical: 20,
+                  paddingHorizontal: 20,
+                  borderRadius: 30,
+                  marginTop: -80,
+                  marginBottom: 20,
                   flexDirection: "row",
-                  justifyContent: "flex-start",
-                  gap: 20,
-                  flex: 1,
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  shadowColor: "rgba(0, 0, 0, 0.5)",
+                  shadowOffset: {
+                    width: 0,
+                    height: 5,
+                  },
+                  shadowOpacity: 0.34,
+                  shadowRadius: 6.27,
+                  elevation: 10,
                 }}>
                 <View
                   style={{
-                    flexDirection: "column",
-                    width: 65,
+                    flexDirection: "row",
                     alignItems: "center",
                     justifyContent: "center",
+                    paddingHorizontal: 20,
+                    gap: 20,
                   }}>
-                  <Avatar />
-                </View>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "flex-start",
-                    gap: 2,
-                  }}>
-                  <View
-                    style={{
-                      elevation: 2,
-                      borderRadius: 3,
-                      paddingHorizontal: 5,
-                      paddingVertical: 2,
-                      backgroundColor: COLORS.blue,
-                    }}>
+                  <ImageBackground
+                    style={{ width: 50, height: 50 }}
+                    source={require("../assets/s1.png")}
+                    resizeMode={"contain"}></ImageBackground>
+                  <View style={{ flexDirection: "column", paddingVertical: 5 }}>
                     <Text
                       style={{
-                        color: "white",
-                        fontSize: 10,
-                        fontWeight: "900",
-                        textAlign: "center",
-                      }}
-                      selectable={false}>
-                      Lv. 4
+                        fontFamily: "Kanit-Medium",
+                        fontSize: 18,
+                        opacity: 0.5,
+                      }}>
+                      Level
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontFamily: "Kanit-Bold",
+                        color: COLORS.text,
+                      }}>
+                      1/100
                     </Text>
                   </View>
-                  <View
-                    style={{
-                      width: "100%",
-                      flexDirection: "row",
-                      justifyContent: "flex-start",
-                      alignItems: "center",
-                      gap: 10,
-                    }}>
-                    <Text selectable={false} style={styles.usernameTitle}>
-                      juberbacher
+                </View>
+
+                <View
+                  style={{
+                    height: "100%",
+                    width: 2,
+                    backgroundColor: "#000",
+                    opacity: 0.05,
+                  }}></View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingHorizontal: 20,
+                    gap: 20,
+                  }}>
+                  <ImageBackground
+                    style={{ width: 50, height: 50, elevation: 5 }}
+                    source={require("../assets/c.png")}
+                    resizeMode={"contain"}></ImageBackground>
+                  <View style={{ flexDirection: "column", paddingVertical: 5 }}>
+                    <Text
+                      style={{
+                        fontFamily: "Kanit-Medium",
+                        fontSize: 18,
+                        opacity: 0.5,
+                      }}>
+                      Coins
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontFamily: "Kanit-Bold",
+                        color: COLORS.text,
+                      }}>
+                      600
                     </Text>
                   </View>
-                  <Text
-                    style={{
-                      color: COLORS.greenDark,
-                      fontSize: 13,
-                      fontWeight: "800",
-                    }}
-                    selectable={false}>
-                    Your turn!
-                  </Text>
                 </View>
               </View>
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontFamily: "Kanit-SemiBold",
+                  color: COLORS.text,
+                }}>
+                My Games
+              </Text>
+              <ScrollView
+                style={{ width: "100%" }}
+                contentContainerStyle={{
+                  width: "100%",
+                  flexDirection: "column",
+                  gap: 20,
+                }}>
+                {remoteData.map((game) => (
+                  <View key={game.id} style={styles.menuInner}>
+                    <View
+                      style={{
+                        width: "100%",
+                        flexDirection: "row",
+                        justifyContent: "flex-start",
+                        gap: 10,
+                        flex: 1,
+                      }}>
+                      <View
+                        style={{
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: 55,
+                          width: 55,
+                          backgroundColor: "rgba(0, 0, 0, 0.1)",
+                          borderRadius: 15,
+                          opacity: 0.75,
+                        }}>
+                        <Text
+                          style={{
+                            fontSize: 8,
+                            fontFamily: "Kanit-SemiBold",
+                            color: COLORS.text,
+                            marginBottom: -8,
+                            marginTop: 4,
+                          }}>
+                          STREAK
+                        </Text>
+                        <Text
+                          style={{
+                            fontSize: 24,
+                            fontFamily: "Kanit-SemiBold",
+                            color: COLORS.text,
+                          }}>
+                          {game.streak}
+                        </Text>
+                      </View>
+                      <Avatar />
+                      <View
+                        style={{
+                          width: "100%",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                          alignItems: "flex-start",
+                          gap: 2,
+                        }}>
+                        <View
+                          style={{
+                            width: "100%",
+                            flexDirection: "row",
+                            justifyContent: "flex-start",
+                            alignItems: "center",
+                            gap: 10,
+                          }}>
+                          <Text selectable={false} style={styles.usernameTitle}>
+                            {game.user1 === username ? game.user2 : game.user1}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                    {game.turn === username && (
+                      <View
+                        style={{
+                          height: 40,
+                          width: "auto",
+                          flexDirection: "column",
+                          justifyContent: "flex-start",
+                          alignItems: "flex-start",
+                        }}>
+                        <NewButton
+                          title="Play"
+                          onPress={() => {
+                            toggleChooseWordModalVisibility();
+                          }}
+                          color="green"
+                        />
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </ScrollView>
               <View
                 style={{
-                  width: "auto",
-                  flexDirection: "column",
-                  justifyContent: "flex-start",
-                  alignItems: "flex-start",
+                  backgroundColor: "rgba(0, 0, 0, 0.0)",
+                  paddingTop: 0,
+                  width: "100%",
+                  flexDirection: "row",
                 }}>
-                <IconButton
+                <NewButton
+                  color="secondary"
+                  title="Create a New Game"
                   onPress={() => {
-                    navigation.navigate("Type");
+                    navigation.navigate("Leaderboard");
                   }}
-                  iconName="arrow-right-circle"
-                  color="green"
                 />
               </View>
             </View>
-
-            <View style={styles.menuInner}>
-              <View
-                style={{
-                  width: "100%",
-                  flexDirection: "row",
-                  justifyContent: "flex-start",
-                  gap: 20,
-                  flex: 1,
-                }}>
-                <View
-                  style={{
-                    flexDirection: "column",
-                    width: 65,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}>
-                  <Avatar />
-                </View>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "flex-start",
-                    gap: 2,
-                  }}>
-                  <View
-                    style={{
-                      elevation: 2,
-                      borderRadius: 3,
-                      paddingHorizontal: 5,
-                      paddingVertical: 2,
-                      backgroundColor: COLORS.blue,
-                    }}>
-                    <Text
-                      style={{
-                        color: "white",
-                        fontSize: 10,
-                        fontWeight: "900",
-                        textAlign: "center",
-                      }}
-                      selectable={false}>
-                      Lv. 4
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      width: "100%",
-                      flexDirection: "row",
-                      justifyContent: "flex-start",
-                      alignItems: "center",
-                      gap: 10,
-                    }}>
-                    <Text selectable={false} style={styles.usernameTitle}>
-                      juberbacher
-                    </Text>
-                  </View>
-                  <Text
-                    style={{ color: "gray", fontSize: 13, fontWeight: "800" }}
-                    selectable={false}>
-                    Waiting...
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.menuInner}>
-              <View
-                style={{
-                  width: "100%",
-                  flexDirection: "row",
-                  justifyContent: "flex-start",
-                  gap: 20,
-                  flex: 1,
-                }}>
-                <View
-                  style={{
-                    flexDirection: "column",
-                    width: 65,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}>
-                  <Avatar />
-                </View>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "flex-start",
-                    gap: 2,
-                  }}>
-                  <View
-                    style={{
-                      elevation: 2,
-                      borderRadius: 3,
-                      paddingHorizontal: 5,
-                      paddingVertical: 2,
-                      backgroundColor: COLORS.blue,
-                    }}>
-                    <Text
-                      style={{
-                        color: "white",
-                        fontSize: 10,
-                        fontWeight: "900",
-                        textAlign: "center",
-                      }}
-                      selectable={false}>
-                      Lv. 4
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      width: "100%",
-                      flexDirection: "row",
-                      justifyContent: "flex-start",
-                      alignItems: "center",
-                      gap: 10,
-                    }}>
-                    <Text selectable={false} style={styles.usernameTitle}>
-                      juberbacher
-                    </Text>
-                  </View>
-                  <Text
-                    style={{ color: "gray", fontSize: 13, fontWeight: "800" }}
-                    selectable={false}>
-                    Waiting...
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.menuInner}>
-              <View
-                style={{
-                  width: "100%",
-                  flexDirection: "row",
-                  justifyContent: "flex-start",
-                  gap: 20,
-                  flex: 1,
-                }}>
-                <View
-                  style={{
-                    flexDirection: "column",
-                    width: 65,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}>
-                  <Avatar />
-                </View>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "flex-start",
-                    gap: 2,
-                  }}>
-                  <View
-                    style={{
-                      elevation: 2,
-                      borderRadius: 3,
-                      paddingHorizontal: 5,
-                      paddingVertical: 2,
-                      backgroundColor: COLORS.blue,
-                    }}>
-                    <Text
-                      style={{
-                        color: "white",
-                        fontSize: 10,
-                        fontWeight: "900",
-                        textAlign: "center",
-                      }}
-                      selectable={false}>
-                      Lv. 4
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      width: "100%",
-                      flexDirection: "row",
-                      justifyContent: "flex-start",
-                      alignItems: "center",
-                      gap: 10,
-                    }}>
-                    <Text selectable={false} style={styles.usernameTitle}>
-                      juberbacher
-                    </Text>
-                  </View>
-                  <Text
-                    style={{ color: "gray", fontSize: 13, fontWeight: "800" }}
-                    selectable={false}>
-                    Waiting...
-                  </Text>
-                </View>
-              </View>
-            </View>
           </View>
-        </View>
-      </View>
+        </>
+      )}
     </>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  menuOuter: {
-    borderRadius: 20,
-    backgroundColor: "#b8b8b8",
-    overflow: "hidden",
-    paddingBottom: 10,
-    width: "100%",
-  },
   menu: {
+    flex: 1,
     width: "100%",
-    borderRadius: 20,
     flexDirection: "column",
     alignItems: "flex-start",
     justifyContent: "flex-start",
     backgroundColor: "white",
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#b8b8b8",
+    borderTopStartRadius: 40,
+    borderTopEndRadius: 40,
+    padding: 20,
+    marginTop: 60,
+    gap: 20,
+    shadowColor: "rgba(0, 0, 0, 0.5)",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
+    elevation: 10,
   },
   menuInner: {
     width: "100%",
-    paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    borderBottomWidth: 1,
-    borderBottomColor: "#b8b8b8",
-    paddingVertical: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    backgroundColor: "#feeede",
+    borderRadius: 15,
     gap: 20,
   },
-  menuTitle: {
-    backgroundColor: "#f86134",
-    width: "100%",
-    borderTopRightRadius: 20,
-    borderTopLeftRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
   usernameTitle: {
-    color: "",
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "bold",
+    marginLeft: 10,
+    color: COLORS.text,
   },
   textYourMove: {
     color: "white",
@@ -421,5 +391,3 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
   },
 });
-
-export default Home;

@@ -1,24 +1,30 @@
-import { View, ImageBackground, Text, StyleSheet } from "react-native";
+import {
+  TouchableOpacity,
+  View,
+  ImageBackground,
+  Text,
+  StyleSheet,
+} from "react-native";
 import Button from "../components/Button";
-import { useState, useEffect } from 'react'
+import { useLayoutEffect, useState, useEffect } from "react";
 import COLORS from "../constants/colors";
 import { useNavigation } from "@react-navigation/native";
-import { supabase } from './lib/supabase'
-import { Session } from '@supabase/supabase-js'
+import { supabase } from "../lib/supabase";
+import { Session } from "@supabase/supabase-js";
 
 const Landing = (props) => {
-  const [session, setSession] = useState<Session | null>(null)
+  const [session, setSession] = useState<Session | null>(null);
+  const image = { uri: "../assets/bg.png" };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-    })
+      setSession(session);
+    });
 
     supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
-  }, [])
-
+      setSession(session);
+    });
+  }, []);
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
@@ -26,10 +32,12 @@ const Landing = (props) => {
       headerShown: false,
     });
   }, [navigation]);
-
   return (
-    <View style={styles.overlay}>
-      <View style={styles.overlayOuter}>
+    <View style={styles.container}>
+      <View>
+        <Text>Stuff here</Text>
+      </View>
+      <ImageBackground blurRadius={5} resizeMode="cover">
         <View style={styles.overlayInner}>
           <Text selectable={false} style={styles.overlayTitle}>
             Play Now!
@@ -59,23 +67,45 @@ const Landing = (props) => {
               </View>
               <View
                 style={{ width: "100%", flexDirection: "row", marginTop: 30 }}>
-                <Button
-                  title="Facebook Login"
-                  onPress={() => {
-                    navigation.navigate("Draw");
-                  }}
-                />
-              </View>
-              <View
-                style={{ width: "100%", flexDirection: "row", marginTop: 30 }}>
-                <Button title="Leaderboard" />
-              </View>
-              <View
-                style={{ width: "100%", flexDirection: "row", marginTop: 30 }}>
                 <Button title="Quit" />
               </View>
             </View>
           </View>
+        </View>
+      </ImageBackground>
+      <View
+        style={{
+          marginBottom: 20,
+        }}>
+        <View
+          style={{
+            flexWrap: "wrap",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+          <Text>By tapping Sign In, you agree to our </Text>
+          <TouchableOpacity>
+            <Text
+              style={{
+                textDecorationStyle: "solid",
+                textDecorationLine: "underline",
+              }}
+              onpress={() => Linking.openURL("https://www.google.com")}>
+              Terms of Service
+            </Text>
+          </TouchableOpacity>
+          <Text> and </Text>
+          <TouchableOpacity>
+            <Text
+              style={{
+                textDecorationStyle: "solid",
+                textDecorationLine: "underline",
+              }}
+              onpress={() => Linking.openURL("https://www.google.com")}>
+              Privacy Policy.
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -83,28 +113,13 @@ const Landing = (props) => {
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-    backgroundColor: COLORS.blue,
-    zIndex: 10,
-    padding: 40,
+  container: {
+    flex: 1,
     flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  overlayOuter: {
-    width: "100%",
-    maxWidth: 400,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#229f99",
-    borderRadius: 15,
-    paddingBottom: 15,
-    elevation: 5,
+    justifyContent: "space-between",
+    gap: 40,
+    padding: 20,
+    backgroundColor: COLORS.secondary,
   },
   overlayInner: {
     width: "100%",
@@ -115,8 +130,16 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 24,
     fontWeight: "bold",
-    backgroundColor: "#2ed3cc",
-    borderRadius: 15,
+    backgroundColor: "rgba(255,255,255,0.6)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.9)",
+    borderStyle: "solid",
+    borderRadius: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 0,
   },
   overlayTitle: {
     width: "100%",

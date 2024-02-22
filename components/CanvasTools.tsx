@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   ImageBackground,
 } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import COLORS from "../constants/colors";
 
-const CanvasTools = ({ onStrokeSizeChange }) => {
+const CanvasTools = ({ onSaveDrawing, onClearCanvas, onStrokeSizeChange }) => {
   const strokeArray = [8, 12, 16, 20, 24];
 
   const [selectedStrokeSize, setSelectedStrokeSize] = useState(strokeArray[0]);
@@ -37,7 +39,8 @@ const CanvasTools = ({ onStrokeSizeChange }) => {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          gap: 0,
+          paddingVertical: 10,
+          paddingHorizontal: 20,
         }}>
         {strokeArray.map((stroke) => (
           <TouchableOpacity
@@ -54,11 +57,53 @@ const CanvasTools = ({ onStrokeSizeChange }) => {
               ]}></View>
           </TouchableOpacity>
         ))}
+        <TouchableOpacity onPress={() => null} style={styles.tool}>
+          <View style={{}}>
+            <MaterialCommunityIcons
+              name="palette-swatch-outline"
+              size={30}
+              color="white"
+            />
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => null} style={styles.tool}>
+          <View style={{}}>
+            <MaterialCommunityIcons
+              name="lead-pencil"
+              size={30}
+              color="white"
+            />
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => null} style={styles.tool}>
+          <View style={{}}>
+            <MaterialCommunityIcons name="eraser" size={30} color="white" />
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          onPress={() => {
+            onSaveDrawing();
+          }} style={styles.tool}>
+          <View style={{}}>
+            <MaterialCommunityIcons
+              name="content-save-outline"
+              size={30}
+              color="white"
+            />
+          </View>
+        </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => null}
-          style={styles.box}>
-          <View
-            style={{}}></View>
+          onPress={() => {
+            onClearCanvas();
+          }}
+          style={styles.tool}>
+          <View style={{}}>
+            <MaterialCommunityIcons
+              name="trash-can-outline"
+              size={30}
+              color="white"
+            />
+          </View>
         </TouchableOpacity>
       </View>
     </View>
@@ -66,6 +111,15 @@ const CanvasTools = ({ onStrokeSizeChange }) => {
 };
 
 const styles = StyleSheet.create({
+  tool: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 60,
+    height: 60,
+    elevation: 2,
+  },
   box: {
     backgroundColor: "white",
     borderRadius: 100,
@@ -76,7 +130,6 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     elevation: 2,
-    margin: 15,
   },
   stroke: {
     borderRadius: 100,

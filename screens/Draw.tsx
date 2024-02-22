@@ -1,23 +1,9 @@
-import {
-  SafeAreaView,
-  Platform,
-  StatusBar,
-  View,
-  Text,
-  Pressable,
-  Image,
-} from "react-native";
+import { View } from "react-native";
 import React, { useState } from "react";
-import Nav from "../components/Nav";
 import Canvas from "../components/Canvas";
-import LetterBoard from "../components/LetterBoard";
-import Avatar from "../components/Avatar";
-import FlatButton from "../components/FlatButton";
-import COLORS from "../constants/colors";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useNavigation } from "@react-navigation/native";
 import { useLayoutEffect } from "react";
 import ConfirmDialog from "../components/ConfirmDialog";
+import Modal from "../components/Modal";
 
 const Draw = ({ route, navigation }) => {
   const [isConfirmDialogVisible, setIsConfirmDialogVisible] = useState(false);
@@ -34,19 +20,24 @@ const Draw = ({ route, navigation }) => {
   };
 
   const submitDrawing = () => {
-    console.log("YOOOO")
+    console.log("YOOOO");
     toggleConfirmDialogVisible();
   };
 
   const onConfirmDialog = () => {
     setIsConfirmDialogVisible(false);
-    navigation.navigate("Home");
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Guess" }],
+    });
   };
 
   return (
     <>
       {isConfirmDialogVisible && (
-        <ConfirmDialog  onClose={() => onConfirmDialog()} />
+        <Modal props="" title="Drawing sent!">
+          <ConfirmDialog onClose={() => onConfirmDialog()} />
+        </Modal>
       )}
       <View
         style={{

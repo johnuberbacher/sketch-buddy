@@ -1,64 +1,74 @@
-import { View, Text, StyleSheet, Animated } from "react-native";
-import Button from "../components/Button";
-import React, {useRef, useEffect} from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import NewButton from "../components/NewButton";
+import React, { useState } from "react";
+import Avatar from "../components/Avatar";
+import COLORS from "../constants/colors";
 
 const ConfirmDialog = (props) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 100,
-      useNativeDriver: true,
-    }).start();
-  }, [fadeAnim]);
-
-  const onClose = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 100,
-      useNativeDriver: true,
-    }).start(() => {
-      props.onClose();
-    });
-  };
+  const [loading, setLoading] = useState(false);
 
   return (
-    <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-      <View style={styles.overlay}>
-        <View style={styles.overlayOuter}>
-          <View style={styles.overlayInner}>
-            <Text selectable={false} style={styles.overlayTitle}>
+    <>
+      {loading ? (
+        <View
+          style={{
+            paddingVertical: 40,
+            height: "100%",
+            width: "100%",
+            flex: 1,
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+          <ActivityIndicator size="large" color={COLORS.secondary} />
+        </View>
+      ) : (
+        <>
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 20,
+            }}>
+            <Avatar />
+            <Text
+              style={{
+                width: "100%",
+                height: "auto",
+                fontSize: 18,
+                fontFamily: "Kanit-Regular",
+                color: COLORS.text,
+                textAlign: "center",
+                paddingHorizontal: 20,
+                flexWrap: "wrap",
+              }}>
               Your drawing was sent to juberbacher!
             </Text>
             <View
               style={{
-                flexDirection: "row",
                 width: "100%",
+                height: "auto",
+                flexDirection: "row",
               }}>
-              <View
-                style={{
-                  width: "100%",
-                  flex: 1,
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  justifyContent: "strech",
-                  gap: 0,
-                }}>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "row",
-                    marginTop: 30,
-                  }}>
-                  <Button title="Okay" onPress={onClose} />
-                </View>
-              </View>
+              <NewButton
+                color="primary"
+                title="Continue"
+                onPress={() => {
+                  props.onClose();
+                }}
+              />
             </View>
           </View>
-        </View>
-      </View>
-    </Animated.View>
+        </>
+      )}
+    </>
   );
 };
 
@@ -69,40 +79,38 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
     right: 0,
-    backgroundColor: "rgba(0,0,0,0.25)",
+    padding: 20,
+    backgroundColor: "rgba(33, 33, 33, 0.9)",
     zIndex: 10,
-    padding: 40,
+    flex: 1,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-  },
-  overlayOuter: {
-    width: "100%",
-    maxWidth: 400,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#229f99",
-    borderRadius: 15,
-    paddingBottom: 15,
-    elevation: 10,
   },
   overlayInner: {
     width: "100%",
+    maxWidth: 400,
+    marginHorizontal: "auto",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     padding: 40,
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    backgroundColor: "#2ed3cc",
-    borderRadius: 15,
+    backgroundColor: "rgba(255,255,255,0.6)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.9)",
+    borderStyle: "solid",
+    borderRadius: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 0,
   },
   overlayTitle: {
     width: "100%",
     color: "white",
-    fontSize: 30,
-    fontFamily: "TitanOne-Regular",
+    fontSize: 24,
+    fontFamily: "Kanit-SemiBold",
     textShadowColor: "rgba(0, 0, 0, 0.25)",
     textShadowOffset: { width: 0, height: 4 },
     textShadowRadius: 2,

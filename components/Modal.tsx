@@ -6,10 +6,11 @@ import {
   Animated,
   ImageBackground,
 } from "react-native";
-import NewButton from "../components/NewButton";
 import COLORS from "../constants/colors";
+import { useNavigation } from "@react-navigation/native";
 
-const Settings = (props) => {
+const Modal = ({ props, title, children }) => {
+  const navigation = useNavigation();
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -45,7 +46,7 @@ const Settings = (props) => {
           resizeMode="cover">
           <View style={styles.overlayInner}>
             <Text selectable={false} style={styles.overlayTitle}>
-              Settings
+              {title}
             </Text>
             <View
               style={{
@@ -58,38 +59,19 @@ const Settings = (props) => {
               style={{
                 flexDirection: "row",
                 width: "100%",
+                height: "auto",
               }}>
               <View
                 style={{
                   width: "100%",
+                  height: "auto",
                   flex: 1,
                   flexDirection: "column",
                   alignItems: "flex-start",
                   justifyContent: "strech",
+                  gap: 20,
                 }}>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "row",
-                  }}>
-                  <NewButton title="Mute" />
-                </View>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "row",
-                    marginTop: 20,
-                  }}>
-                  <NewButton title="Logout" />
-                </View>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "row",
-                    marginTop: 20,
-                  }}>
-                  <NewButton title="Close" onPress={onClose} />
-                </View>
+                <>{children}</>
               </View>
             </View>
           </View>
@@ -107,7 +89,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 0,
     backgroundColor: "rgba(0,0,0,0.25)",
-    // rgb(255, 193, 90, 0.5)
     zIndex: 10,
     padding: 40,
     flexDirection: "column",
@@ -116,6 +97,7 @@ const styles = StyleSheet.create({
   },
   overlayInner: {
     width: "100%",
+    height: "auto",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
@@ -144,4 +126,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Settings;
+export default Modal;
