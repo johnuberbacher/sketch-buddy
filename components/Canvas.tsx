@@ -100,19 +100,40 @@ const Canvas = ({ onSubmitDraw, word }) => {
   };
 
   const handleSaveDrawing = async () => {
-      try {
-        const uri = await viewShotRef.current.capture();
-        const fileUri = `${FileSystem.documentDirectory}capturedImage.png`;
-        await FileSystem.moveAsync({
-          from: uri,
-          to: fileUri,
-        });
-        await MediaLibrary.saveToLibraryAsync(uri);
-        console.log('Image saved:', fileUri);
-      } catch (error) {
-        console.error('Error capturing and saving image:', error);
+    try {
+      // Request permission to access the media library
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+
+      if (status !== "granted") {
+        // Permission denied, show an alert or handle accordingly
+        console.error(
+          "Permission Denied",
+          "Please grant permission to access the media library."
+        );
+        //  return;
       }
-    };
+
+      const uri = await viewShotRef.current.capture();
+      const fileUri = `${FileSystem.documentDirectory}capturedImage.png`;
+
+      // Save the image to a specific folder on the device
+      await FileSystem.moveAsync({
+        from: uri,
+        to: fileUri,
+      });
+
+      // Save the image to the media library
+      await MediaLibrary.saveToLibraryAsync(fileUri);
+
+      console.log("Image saved to media library:", fileUri);
+    } catch (error) {
+      console.error("Error capturing and saving image:", error);
+    }
+  };
+
+  const handleEraser = () => {
+    setSelectedColor("#fff");
+  };
 
   const submitDrawing = () => {
     onSubmitDraw();
@@ -125,71 +146,72 @@ const Canvas = ({ onSubmitDraw, word }) => {
         flex: 1,
         width: "100%",
         height: "100%",
+        backgroundColor: COLORS.secondary,
       }}>
+        
       <View
         style={{
-          height: "auto",
           width: "100%",
+          height: "auto",
           flexDirection: "row",
-          alignItems: "stretch",
+          alignItems: "center",
           justifyContent: "space-between",
-          gap: 15,
-          backgroundColor: COLORS.primary,
+          paddingTop: 20,
+          gap: 20,
         }}>
         <View
           style={{
+            width: "100%",
+            flex: 1,
             flexDirection: "row",
-            alignItems: "stretch",
+            alignItems: "center",
             justifyContent: "flex-start",
-            gap: 15,
+            gap: 20,
           }}>
-          <View style={{ padding: 10, backgroundColor: COLORS.secondary }}>
-            <View
-              style={{
-                flexDirection: "column",
-                height: "100%",
-                flex: 1,
-                width: "auto",
-                aspectRatio: 1,
-                alignItems: "center",
-                justifyContent: "center",
-                position: "relative",
-              }}>
-              <View
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  right: -3,
-                  zIndex: 1,
-                  elevation: 1,
-                }}>
-                <Text
-                  style={{
-                    fontSize: 20,
-                    textAlign: "center",
-                  }}
-                  selectable={false}>
-                  🇺🇸
-                </Text>
-              </View>
-              <Avatar />
-            </View>
+          <View
+            style={{
+              paddingLeft: 20,
+              backgroundColor: COLORS.secondary,
+              width: 100,
+            }}>
+            <Avatar />
           </View>
           <View
             style={{
-              flexDirection: "column",
-              alignItems: "flex-start",
-              justifyContent: "stretch",
+              flex: 1,
+              paddingLeft: 30,
+              paddingRight: 20,
+              paddingVertical: 10,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              borderTopStartRadius: 40,
+              borderBottomStartRadius: 40,
+              backgroundColor: COLORS.primary,
+              shadowColor: "rgba(0, 0, 0, 0.5)",
+              shadowOffset: {
+                width: 0,
+                height: 0,
+              },
+              shadowOpacity: 0.34,
+              shadowRadius: 6.27,
+              elevation: 10,
             }}>
             <View
-              style={{ flexDirection: "row", justifyContent: "flex-start" }}>
+              style={{
+                flexDirection: "column",
+                alignItems: "flex-start",
+                justifyContent: "flex-start",
+                gap: 0,
+              }}>
               <Text
                 selectable={false}
                 style={{
-                  paddingTop: 15,
-                  fontSize: 16,
+                  fontSize: 14,
                   fontFamily: "Kanit-Regular",
                   color: "white",
+                  opacity: 0.75,
+                  lineHeight: 18,
                   textShadowColor: "rgba(0, 0, 0, 0.25)",
                   textShadowOffset: { width: 0, height: 2 },
                   textShadowRadius: 4,
@@ -200,48 +222,44 @@ const Canvas = ({ onSubmitDraw, word }) => {
                 selectable={false}
                 style={{
                   textTransform: "uppercase",
-                  paddingTop: 15,
-                  fontSize: 16,
+                  fontSize: 30,
                   fontFamily: "Kanit-SemiBold",
                   color: "white",
+                  lineHeight: 36,
                   textShadowColor: "rgba(0, 0, 0, 0.25)",
                   textShadowOffset: { width: 0, height: 2 },
                   textShadowRadius: 4,
                 }}>
-                {" "}
                 {staticword}
               </Text>
+              <Text
+                selectable={false}
+                style={{
+                  fontSize: 14,
+                  fontFamily: "Kanit-Regular",
+                  color: "white",
+                  opacity: 0.75,
+                  lineHeight: 14,
+                  textShadowColor: "rgba(0, 0, 0, 0.25)",
+                  textShadowOffset: { width: 0, height: 2 },
+                  textShadowRadius: 4,
+                }}>
+                for juberbacher
+              </Text>
             </View>
-            <Text
-              selectable={false}
-              style={{
-                paddingBottom: 15,
-                fontSize: 16,
-                fontFamily: "Kanit-Regular",
-                color: "white",
-                textShadowColor: "rgba(0, 0, 0, 0.25)",
-                textShadowOffset: { width: 0, height: 2 },
-                textShadowRadius: 4,
-              }}>
-              for juberbacher
-            </Text>
+            <FlatButton />
           </View>
-        </View>
-        <View
-          style={{
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            paddingRight: 15,
-          }}>
-          <FlatButton />
         </View>
       </View>
 
       <ViewShot
         ref={viewShotRef}
         options={{ format: "png", quality: 1 }}
-        style={{ flex: 1, height: "100%" }}>
+        style={{
+          flex: 1,
+          height: "100%",
+          padding: 20,
+        }}>
         <View style={styles.container}>
           <GestureHandlerRootView style={{ flex: 1, width: "100%" }}>
             <PanGestureHandler
@@ -275,24 +293,71 @@ const Canvas = ({ onSubmitDraw, word }) => {
         </View>
       </ViewShot>
 
-      <ColorPicker onColorChange={handleColorChange} />
-      <CanvasTools
-        onSaveDrawing={handleSaveDrawing}
-        onClearCanvas={handleClearCanvas}
-        onStrokeSizeChange={handleStrokeSizeChange}
-      />
-
       <View
         style={{
-          height: "auto",
           width: "100%",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          backgroundColor: "white",
+          borderTopStartRadius: 40,
+          borderTopEndRadius: 40,
           padding: 20,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "stretch",
           gap: 20,
+          shadowColor: "rgba(0, 0, 0, 0.5)",
+          shadowOffset: {
+            width: 0,
+            height: 0,
+          },
+          shadowOpacity: 0.34,
+          shadowRadius: 6.27,
+          elevation: 10,
         }}>
-        <NewButton color="secondary" title="Continue" onPress={submitDrawing} />
+        <View
+          style={{
+            position: "absolute",
+            left: 20,
+            right: 20,
+            top: -20,
+            zIndex: 2,
+            backgroundColor: "white",
+            paddingVertical: 20,
+            paddingHorizontal: 20,
+            borderRadius: 30,
+            flexDirection: "row",
+            justifyContent: "space-around",
+            alignItems: "center",
+            shadowColor: "rgba(0, 0, 0, 0.5)",
+            shadowOffset: {
+              width: 0,
+              height: 5,
+            },
+            shadowOpacity: 0.34,
+            shadowRadius: 6.27,
+            elevation: 10,
+          }}>
+          <ColorPicker onColorChange={handleColorChange} />
+        </View>
+        <CanvasTools
+          onSaveDrawing={handleSaveDrawing}
+          onEraser={handleEraser}
+          onClearCanvas={handleClearCanvas}
+          onStrokeSizeChange={handleStrokeSizeChange}
+        />
+        <View
+          style={{
+            height: "auto",
+            width: "100%",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "stretch",
+            gap: 20,
+          }}>
+          <NewButton
+            color="secondary"
+            title="Continue"
+            onPress={submitDrawing}
+          />
+        </View>
       </View>
     </View>
   );
@@ -305,6 +370,15 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 20,
+    shadowColor: "rgba(0, 0, 0, 0.5)",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
+    elevation: 10,
   },
   svgContainer: {
     height: "100%",

@@ -6,7 +6,6 @@ import Home from "./screens/Home";
 import Draw from "./screens/Draw";
 import Guess from "./screens/Guess";
 import Landing from "./screens/Landing";
-import Menu from "./screens/Menu";
 import Leaderboard from "./screens/Leaderboard";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -136,11 +135,6 @@ const App = () => {
               <Stack.Screen
                 name="Guess"
                 component={Guess}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="Menu"
-                component={Menu}
                 options={{ headerShown: false }}
               />
               <Stack.Screen

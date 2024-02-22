@@ -1,13 +1,9 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import NewButton from "../components/NewButton";
 import React, { useState } from "react";
 import Avatar from "../components/Avatar";
 import COLORS from "../constants/colors";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const ConfirmDialog = (props) => {
   const [loading, setLoading] = useState(false);
@@ -37,7 +33,34 @@ const ConfirmDialog = (props) => {
               justifyContent: "center",
               gap: 20,
             }}>
-            <Avatar />
+            <View
+              style={{
+                flexDirection: "row",
+                width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 20,
+              }}>
+              <View
+                style={{
+                  width: 80,
+                }}>
+                <Avatar />
+              </View>
+          <View style={{}}>
+            <MaterialCommunityIcons
+              name="transfer-right"
+              size={30}
+              color={COLORS.primary}
+            />
+          </View>
+              <View
+                style={{
+                  width: 80,
+                }}>
+                <Avatar />
+              </View>
+            </View>
             <Text
               style={{
                 width: "100%",

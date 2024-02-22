@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 24,
     fontWeight: "bold",
-    backgroundColor: "rgba(255,255,255,0.9)",
+    backgroundColor: "rgba(255,255,255,0.95)",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,1.0)",
     borderStyle: "solid",

@@ -14,6 +14,21 @@ const Button = (props) => {
   const [isPressed, setIsPressed] = useState(false);
   const [sound, setSound] = useState();
 
+  const buttonInnerStyle = StyleSheet.flatten([
+    styles.buttonInner,
+    {
+      paddingTop: props.size === "small" ? 5 : 15,
+      paddingBottom: props.size === "small" ? 5 : 15,
+    },
+  ]);
+
+  const buttonTextStyle = StyleSheet.flatten([
+    styles.buttonText,
+    {
+      fontSize: props.size === "small" ? 18 : 20,
+    },
+  ]);
+
   useEffect(() => {
     return () => {
       if (sound) {
@@ -61,8 +76,8 @@ const Button = (props) => {
         colors={getColorArray()}
         start={{ x: 0.4, y: 0 }}
         end={{ x: 0.6, y: 1 }}>
-        <View style={styles.buttonInner}>
-          <Text selectable={false} style={styles.buttonText}>
+        <View style={buttonInnerStyle}>
+          <Text selectable={false} style={buttonTextStyle}>
             {props.title}
           </Text>
           {props.reward ? (
@@ -102,7 +117,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontSize: 19,
+    fontSize: 20,
     fontFamily: "Kanit-SemiBold",
     textShadowColor: "rgba(0, 0, 0, 0.25)",
     textShadowOffset: { width: 0, height: 1 },

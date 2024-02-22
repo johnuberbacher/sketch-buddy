@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import LetterButton from "../components/LetterButton";
 import Button from "../components/Button";
@@ -17,7 +17,7 @@ const shuffleArray = (array) => {
     [array[i], array[j]] = [array[j], array[i]];
   }
 };
-  
+
 const LetterBoard = () => {
   const [optionLetters, setOptionLetters] = useState([]);
   const [answerLetters, setAnswerLetters] = useState([]);
@@ -26,10 +26,10 @@ const LetterBoard = () => {
 
   useEffect(() => {
     const staticWordFrequencyMap = new Map(
-      [...staticWord].map((char) => [char, 1])   
+      [...staticWord].map((char) => [char, 1])
     );
     const alphabet = "abcdefghijklmnopqrstuvwxyz";
-    
+
     // Ensure that staticWord letters are included in optionLetters
     const staticWordLetters = generateCharactersFromFrequency(
       staticWordFrequencyMap,
@@ -45,7 +45,7 @@ const LetterBoard = () => {
     }
 
     console.log(staticWord);
-    console.log(difficulty );
+    console.log(difficulty);
 
     const randomLetters = Array.from(
       { length: difficultyLength - staticWord.length },
@@ -192,7 +192,7 @@ const LetterBoard = () => {
   ]);
 
   return (
-    <View style={{ width: "100%", marginBottom: 10 }}>
+    <>
       <View style={wrapperStyles}>
         {answerLetters.map((letter, index) => (
           <LetterButton
@@ -240,7 +240,7 @@ const LetterBoard = () => {
           paddingRight: 10,
           marginTop: 20,
         }}></View>
-    </View>
+    </>
   );
 };
 
@@ -252,11 +252,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 10,
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingTop: 20,
-    paddingBottom: 10,
-    marginBottom: 20,
   },
   wrapperVictoryStyles: {
     backgroundColor: "#ade053",
@@ -264,11 +259,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 10,
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingTop: 10,
-    paddingBottom: 10,
-    marginBottom: 10,
   },
   topRow: {
     width: "100%",
@@ -276,8 +266,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "stretch",
     gap: 4,
-    paddingLeft: 10,
-    paddingRight: 10,
   },
   secondRow: {
     marginTop: 15,
@@ -286,8 +274,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "stretch",
     gap: 4,
-    paddingLeft: 10,
-    paddingRight: 10,
   },
   wrapperVictoryStyles: {
     backgroundColor: "#ade053",

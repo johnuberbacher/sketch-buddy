@@ -18,9 +18,10 @@ const Avatar = (props) => {
 
   return (
     <View
-      style={{
+      style={{ 
         flexDirection: "column",
-        width: 55,
+        width: "100%",
+        height: "auto",
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
@@ -33,18 +34,22 @@ const Avatar = (props) => {
             right: -3,
             zIndex: 1,
             elevation: 1,
-            backgroundColor: COLORS.secondary,
+            backgroundColor: COLORS.primary,
+            aspectRatio: 1,
             borderRadius: 5,
-            paddingHorizontal: 5,
+            paddingHorizontal: 4,
+            paddingVertical: 0,
             borderWidth: 4,
             borderColor: "white",
             borderStyle: "solid",
           }}>
           <Text
             style={{
-              marginTop: -8,
-              fontSize: 16,
+              marginTop: -3,
+              fontSize: 13,
+              fontFamily: "Kanit-Bold",
               textAlign: "center",
+              color: "white",
             }}
             selectable={false}>
             🇺🇸
@@ -84,6 +89,7 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 15,
     elevation: 0,
+    aspectRatio: 1,
   },
   buttonInner: {
     flexDirection: "column",

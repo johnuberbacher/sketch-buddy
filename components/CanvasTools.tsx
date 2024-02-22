@@ -9,7 +9,12 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import COLORS from "../constants/colors";
 
-const CanvasTools = ({ onSaveDrawing, onClearCanvas, onStrokeSizeChange }) => {
+const CanvasTools = ({
+  onSaveDrawing,
+  onEraser,
+  onClearCanvas,
+  onStrokeSizeChange,
+}) => {
   const strokeArray = [8, 12, 16, 20, 24];
 
   const [selectedStrokeSize, setSelectedStrokeSize] = useState(strokeArray[0]);
@@ -20,27 +25,12 @@ const CanvasTools = ({ onSaveDrawing, onClearCanvas, onStrokeSizeChange }) => {
   };
 
   return (
-    <View
-      style={{
-        width: "100%",
-        backgroundColor: "#F0F2F2",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: 10,
-        elevation: 5,
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
-        borderColor: "#babfc5",
-      }}>
+    <>
       <View
         style={{
-          flex: 1,
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          paddingVertical: 10,
-          paddingHorizontal: 20,
         }}>
         {strokeArray.map((stroke) => (
           <TouchableOpacity
@@ -57,6 +47,14 @@ const CanvasTools = ({ onSaveDrawing, onClearCanvas, onStrokeSizeChange }) => {
               ]}></View>
           </TouchableOpacity>
         ))}
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingVertical: 0,
+        }}>
         <TouchableOpacity onPress={() => null} style={styles.tool}>
           <View style={{}}>
             <MaterialCommunityIcons
@@ -75,15 +73,20 @@ const CanvasTools = ({ onSaveDrawing, onClearCanvas, onStrokeSizeChange }) => {
             />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => null} style={styles.tool}>
+        <TouchableOpacity
+          onPress={() => {
+            onEraser();
+          }}
+          style={styles.tool}>
           <View style={{}}>
             <MaterialCommunityIcons name="eraser" size={30} color="white" />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => {
             onSaveDrawing();
-          }} style={styles.tool}>
+          }}
+          style={styles.tool}>
           <View style={{}}>
             <MaterialCommunityIcons
               name="content-save-outline"
@@ -106,7 +109,7 @@ const CanvasTools = ({ onSaveDrawing, onClearCanvas, onStrokeSizeChange }) => {
           </View>
         </TouchableOpacity>
       </View>
-    </View>
+    </>
   );
 };
 

@@ -106,6 +106,7 @@ const ChooseWord = (props) => {
                 color="primary"
                 title={word.data.word}
                 reward={index + 1}
+                key={word.data.word}
                 onPress={() => {
                   selectWord(word.data.word, index);
                 }}

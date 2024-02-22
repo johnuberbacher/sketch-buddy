@@ -39,7 +39,7 @@ const Nav = () => {
         <View style={{ borderWidth: 0 }}>
           <FlatButton onPress={toggleSettingsVisibility} />
         </View>
-        <View style={{ borderWidth: 0 }}>
+        <View style={{ width: 60, borderWidth: 0 }}>
           <Avatar />
         </View>
       </View>

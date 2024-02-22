@@ -20,6 +20,7 @@ import Modal from "../components/Modal";
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [remoteData, setRemoteData] = useState([]);
+  const [sortedData, setSortedData] = useState([]);
   const [username, setUsername] = useState("juberbacher");
   const navigation = useNavigation();
   const [isChooseWordVisibleModal, setIsChooseWordModalVisible] =
@@ -39,9 +40,9 @@ export default function Home() {
   }, [navigation]);
 
   useEffect(() => {
-    //  if (session) getProfile();
-    getProfile();
-  }, []);
+    // This block will run whenever sortedData is updated
+    console.log("Sorted data updated:", sortedData);
+  }, [sortedData]);
 
   async function getProfile() {
     try {
@@ -58,6 +59,20 @@ export default function Home() {
       if (data) {
         console.log("Data fetched successfully:", data);
         setRemoteData(data);
+
+        const sortedRemoteData = [...data].sort((a, b) => {
+          // Entries where 'turn' is equal to the specified username come first
+          if (a.turn === username && b.turn !== username) {
+            return -1;
+          }
+          if (a.turn !== username && b.turn === username) {
+            return 1;
+          }
+          // For other cases or if both have the same 'turn', maintain the original order
+          return 0;
+        });
+
+        setSortedData(sortedRemoteData);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -66,9 +81,13 @@ export default function Home() {
       }
     } finally {
       setLoading(false);
-      console.log("Loading state set to false.");
     }
   }
+
+  // Call getProfile when the component mounts
+  useEffect(() => {
+    getProfile();
+  }, []); // Empty dependency array ensures it runs only once when the component mounts
 
   return (
     <>
@@ -227,7 +246,7 @@ export default function Home() {
                   flexDirection: "column",
                   gap: 20,
                 }}>
-                {remoteData.map((game) => (
+                {sortedData.map((game) => (
                   <View key={game.id} style={styles.menuInner}>
                     <View
                       style={{
@@ -241,8 +260,8 @@ export default function Home() {
                         style={{
                           alignItems: "center",
                           justifyContent: "center",
-                          height: 55,
-                          width: 55,
+                          height: 60,
+                          width: 60,
                           backgroundColor: "rgba(0, 0, 0, 0.1)",
                           borderRadius: 15,
                           opacity: 0.75,
@@ -266,7 +285,12 @@ export default function Home() {
                           {game.streak}
                         </Text>
                       </View>
-                      <Avatar />
+                      <View
+                        style={{
+                          width: 60,
+                        }}>
+                        <Avatar />
+                      </View>
                       <View
                         style={{
                           width: "100%",
@@ -300,6 +324,7 @@ export default function Home() {
                         }}>
                         <NewButton
                           title="Play"
+                          size="small"
                           onPress={() => {
                             toggleChooseWordModalVisibility();
                           }}
@@ -321,7 +346,7 @@ export default function Home() {
                   color="secondary"
                   title="Create a New Game"
                   onPress={() => {
-                    navigation.navigate("Leaderboard");
+                    toggleChooseWordModalVisibility();
                   }}
                 />
               </View>
