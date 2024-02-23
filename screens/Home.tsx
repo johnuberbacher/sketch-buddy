@@ -5,22 +5,23 @@ import {
   ActivityIndicator,
   StyleSheet,
   ImageBackground,
+  Alert,
 } from "react-native";
-import { supabase } from "../lib/supabase";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import Nav from "../components/Nav";
 import NewButton from "../components/NewButton";
 import COLORS from "../constants/colors";
 import Avatar from "../components/Avatar";
 import { useNavigation } from "@react-navigation/native";
+import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
 import ChooseWord from "../components/ChooseWord";
 import Modal from "../components/Modal";
 
-export default function Home() {
+export default function Home({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true);
-  const [remoteData, setRemoteData] = useState([]);
-  const [sortedData, setSortedData] = useState([]);
+  const [remoteData, setRemoteData] = useState<any[]>([]);
+  const [sortedData, setSortedData] = useState<any[]>([]);
   const [username, setUsername] = useState("juberbacher");
   const navigation = useNavigation();
   const [isChooseWordVisibleModal, setIsChooseWordModalVisible] =
@@ -44,7 +45,7 @@ export default function Home() {
     console.log("Sorted data updated:", sortedData);
   }, [sortedData]);
 
-  async function getProfile() {
+  async function loadGames() {
     try {
       setLoading(true);
       console.log("Fetching data from 'games' table...");
@@ -76,7 +77,7 @@ export default function Home() {
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error("Error in getProfile:", error.message);
+        console.error("Error in loadGames:", error.message);
         alert(error.message);
       }
     } finally {
@@ -84,10 +85,18 @@ export default function Home() {
     }
   }
 
-  // Call getProfile when the component mounts
+  async function getProfile() {
+    console.log('session', session)
+  }
+
+  // Call loadGames when the component mounts
   useEffect(() => {
-    getProfile();
-  }, []); // Empty dependency array ensures it runs only once when the component mounts
+    if (session) {
+      console.log(session)
+     // getProfile();
+      loadGames();
+    }
+  }, []);
 
   return (
     <>
@@ -128,6 +137,7 @@ export default function Home() {
             <View
               style={{
                 paddingHorizontal: 20,
+                position: "relative",
               }}>
               <Text
                 style={{
@@ -135,8 +145,21 @@ export default function Home() {
                   fontFamily: "Kanit-Bold",
                   color: COLORS.text,
                 }}>
-                Let's Play
+                Let's Play {String(session)}
               </Text>
+              <ImageBackground
+                style={{
+                  zIndex: 0,
+                  transform: [{ scaleX: -1 }],
+                  right: 50,
+                  top: -60,
+                  position: "absolute",
+                  width: 180,
+                  height: 180,
+                  marginHorizontal: "auto",
+                }}
+                source={require("../assets/fox.png")}
+                resizeMode={"contain"}></ImageBackground>
             </View>
             <View style={styles.menu}>
               <View
@@ -147,7 +170,6 @@ export default function Home() {
                   paddingHorizontal: 20,
                   borderRadius: 30,
                   marginTop: -80,
-                  marginBottom: 20,
                   flexDirection: "row",
                   justifyContent: "space-around",
                   alignItems: "center",

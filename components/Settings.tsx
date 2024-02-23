@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -8,9 +8,19 @@ import {
 } from "react-native";
 import NewButton from "../components/NewButton";
 import COLORS from "../constants/colors";
+import { supabase } from "../lib/supabase";
+import { Session } from "@supabase/supabase-js";
 
-const Settings = (props) => {
+const Settings = ({ session }: { session: Session }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState("");
+  const [website, setWebsite] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+
+  useEffect(() => {
+    //   if (session) getProfile();
+  }, [session]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -80,7 +90,10 @@ const Settings = (props) => {
                     flexDirection: "row",
                     marginTop: 20,
                   }}>
-                  <NewButton title="Logout" />
+                  <NewButton
+                    title="Logout"
+                    onPress={() => supabase.auth.signOut()}
+                  />
                 </View>
                 <View
                   style={{
@@ -88,7 +101,7 @@ const Settings = (props) => {
                     flexDirection: "row",
                     marginTop: 20,
                   }}>
-                  <NewButton title="Close" onPress={onClose} />
+                  <NewButton title="Close" onPress={() => onClose()} />
                 </View>
               </View>
             </View>

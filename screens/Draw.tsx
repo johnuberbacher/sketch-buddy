@@ -19,8 +19,7 @@ const Draw = ({ route, navigation }) => {
     setIsConfirmDialogVisible(!isConfirmDialogVisible);
   };
 
-  const submitDrawing = () => {
-    console.log("YOOOO");
+  const handleSubmitDrawing = () => {
     toggleConfirmDialogVisible();
   };
 
@@ -46,7 +45,7 @@ const Draw = ({ route, navigation }) => {
           justifyContent: "flex-start",
           alignItems: "center",
         }}>
-        <Canvas onSubmitDraw={submitDrawing} word={word} />
+        <Canvas onSubmitDraw={handleSubmitDrawing} word={word} />
       </View>
     </>
   );

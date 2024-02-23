@@ -9,8 +9,6 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import COLORS from "../constants/colors";
-import { Audio } from "expo-av";
-import { LinearGradient } from "expo-linear-gradient";
 
 const Avatar = (props) => {
   const image = { uri: "https://avatars.githubusercontent.com/u/5966499?v=4" };

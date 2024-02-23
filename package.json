@@ -22,8 +22,10 @@
     "expo": "~50.0.6",
     "expo-av": "~13.10.5",
     "expo-blur": "~12.9.2",
+    "expo-file-system": "~16.0.6",
     "expo-font": "~11.10.3",
     "expo-linear-gradient": "~12.7.2",
+    "expo-media-library": "~15.9.1",
     "expo-splash-screen": "~0.26.4",
     "expo-status-bar": "~1.11.1",
     "react": "18.2.0",
@@ -38,9 +40,7 @@
     "react-native-url-polyfill": "^2.0.0",
     "react-native-view-shot": "3.8.0",
     "react-native-web": "~0.19.6",
-    "typescript": "^5.3.0",
-    "expo-file-system": "~16.0.6",
-    "expo-media-library": "~15.9.1"
+    "typescript": "^5.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

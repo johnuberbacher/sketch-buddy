@@ -20,6 +20,12 @@
       },
       "plugins": [
         [
+          "@react-native-google-signin/google-signin",
+          {
+            "iosUrlScheme": "com.googleusercontent.apps._some_id_here_"
+          }
+        ],
+        [
           "expo-media-library",
           {
             "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
@@ -37,10 +43,14 @@
         ]
       ],
       "android": {
-        "permissions": ["WRITE_EXTERNAL_STORAGE"]
+        "permissions": [
+          "WRITE_EXTERNAL_STORAGE"
+        ]
       },
       "ios": {
-        "permissions": ["NSPhotoLibraryAddUsageDescription"]
+        "permissions": [
+          "NSPhotoLibraryAddUsageDescription"
+        ]
       }
     },
     "ios": {
@@ -50,13 +60,19 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.johnuberbacher.sketchbuddy"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4da481c2-e24c-4934-8812-6772417b3038"
+      }
+    }
   }
 }

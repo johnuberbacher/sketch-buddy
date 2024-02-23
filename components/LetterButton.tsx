@@ -1,18 +1,18 @@
 import { TouchableHighlight, View, Text, StyleSheet } from "react-native";
 import React, { useState } from "react";
 import COLORS from "../constants/colors";
-import { Audio } from 'expo-av';
-
+import { Audio } from "expo-av";
 
 const LetterButton = (props) => {
-  const baseColor = COLORS[props.color] || COLORS.red;
-  const darkColor = COLORS[`${props.color}Dark`] || COLORS.redDark;
+  const baseColor = COLORS[props.color] || COLORS.primary;
+  const darkColor = COLORS[`${props.color}Dark`] || COLORS.primaryDark;
+
   const [isPressed, setIsPressed] = useState(false);
 
   const handlePressIn = async () => {
     setIsPressed(true);
     const { sound } = await Audio.Sound.createAsync(
-      require('./../assets/sfx/sfx01.mp3')
+      require("./../assets/sfx/sfx01.mp3")
     );
     await sound.playAsync();
   };
@@ -25,24 +25,14 @@ const LetterButton = (props) => {
     isPressed && !props.selected && styles.buttonInnerPressed,
     props.selected && styles.buttonInnerSelected,
     {
-      
       backgroundColor: props.selected ? props.selected : baseColor,
     },
   ]);
-  
-  const buttonOuterStyles = StyleSheet.flatten([
-    styles.buttonOuter,
-    isPressed && !props.selected && styles.buttonOuterPressed,
-    props.selected && styles.buttonOuterSelected,
-    {
-      backgroundColor: props.selected ? props.selected : darkColor,
-    },
-  ]);
-  
+
   return (
     <TouchableHighlight
       activeOpacity={1.0}
-      style={buttonOuterStyles}
+      style={buttonInnerStyles}
       disabled={props.selected}
       onPress={() => {
         if (props.onPress) {
@@ -51,66 +41,44 @@ const LetterButton = (props) => {
       }}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}>
-      <View style={buttonInnerStyles}>
-        <Text selectable={false} style={{ ...styles.buttonText }}>{props.title}</Text>
-      </View>
+      <Text selectable={false} style={{ ...styles.buttonText }}>
+        {props.title}
+      </Text>
     </TouchableHighlight>
   );
 };
 
 const styles = StyleSheet.create({
-  buttonOuter: {
-    flex: 1,
-    backgroundColor: "#b93109",
-    borderRadius: 15,
-    elevation: 2,
-  },
-  buttonOuterPressed: {
-    flex: 1,
-    backgroundColor: "#b93109",
-    borderRadius: 15,
-    elevation: 2,
-  },
-  buttonOuterSelected: {
-    flex: 1,
-    backgroundColor: "#b93109",
-    borderRadius: 15,
-    elevation: 2,
-  },
   buttonInner: {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 15,
-    backgroundColor: "#f86134",
-    marginTop: -10,
-    marginBottom: 10,
+    borderRadius: 10,
+    backgroundColor: COLORS.primary,
     aspectRatio: 1,
+    width: "100%",
+    height: "100%",
+    flexShrink: 1,
+    elevation: 2,
   },
   buttonInnerPressed: {
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 15,
-    backgroundColor: "#f86134",
-    marginTop: -3,
-    marginBottom: 3,
-    aspectRatio: 1,
   },
   buttonInnerSelected: {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 15,
-    backgroundColor: "#9da8ae",
-    marginTop: -3,
-    marginBottom: 3,
+    borderRadius: 10,
+    backgroundColor: COLORS.primary,
     aspectRatio: 1,
+    width: "100%",
+    height: "100%",
+    flexShrink: 1,
+    elevation: 0,
   },
   buttonText: {
     color: "white",
-    fontSize: 24,
-    fontFamily: "TitanOne-Regular",
+    fontSize: 30,
+    fontFamily: "Kanit-Bold",
     textShadowColor: "rgba(0, 0, 0, 0.25)",
     textShadowOffset: { width: 0, height: 3 },
     textShadowRadius: 2,

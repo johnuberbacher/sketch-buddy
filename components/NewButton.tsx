@@ -3,13 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  ImageBackground,
+  ImageBackground,TouchableOpacity, 
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import COLORS from "../constants/colors";
 import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
-
 const Button = (props) => {
   const [isPressed, setIsPressed] = useState(false);
   const [sound, setSound] = useState();
@@ -25,7 +24,7 @@ const Button = (props) => {
   const buttonTextStyle = StyleSheet.flatten([
     styles.buttonText,
     {
-      fontSize: props.size === "small" ? 18 : 20,
+      fontSize: props.size === "small" ? 16 : 20,
     },
   ]);
 
@@ -60,10 +59,10 @@ const Button = (props) => {
   };
 
   return (
-    <TouchableHighlight
-      activeOpacity={0.9}
+    <TouchableOpacity
+      activeOpacity={0.75}
       style={styles.buttonOuter}
-      disabled={props.selected}
+      disabled={props.disabled || props.selected}
       onPress={() => {
         if (props.onPress) {
           props.onPress();
@@ -92,24 +91,19 @@ const Button = (props) => {
           ) : null}
         </View>
       </LinearGradient>
-    </TouchableHighlight>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   buttonOuter: {
     flex: 1,
-    borderRadius: 40,
-    elevation: 1,
     overflow: "hidden",
   },
   buttonInner: {
-    borderRadius: 40,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingTop: 15,
-    paddingBottom: 15,
     paddingLeft: 20,
     paddingRight: 20,
     textTransform: "capitalize",

@@ -5,9 +5,7 @@ import {
   PanGestureHandler,
   State,
 } from "react-native-gesture-handler";
-import { ScrollView, StyleSheet, View, Text } from "react-native";
-import ColorPicker from "./ColorPicker";
-import Button from "./Button";
+import { StyleSheet, View, Text } from "react-native";
 import NewButton from "./NewButton";
 import CanvasTools from "./CanvasTools";
 import Avatar from "./Avatar";
@@ -147,6 +145,7 @@ const Canvas = ({ onSubmitDraw, word }) => {
         width: "100%",
         height: "100%",
         backgroundColor: COLORS.secondary,
+        gap: 20,
       }}>
         
       <View
@@ -258,7 +257,7 @@ const Canvas = ({ onSubmitDraw, word }) => {
         style={{
           flex: 1,
           height: "100%",
-          padding: 20,
+          paddingHorizontal: 20,
         }}>
         <View style={styles.container}>
           <GestureHandlerRootView style={{ flex: 1, width: "100%" }}>
@@ -301,7 +300,8 @@ const Canvas = ({ onSubmitDraw, word }) => {
           backgroundColor: "white",
           borderTopStartRadius: 40,
           borderTopEndRadius: 40,
-          padding: 20,
+          paddingHorizontal: 20,
+          paddingBottom: 20,
           gap: 20,
           shadowColor: "rgba(0, 0, 0, 0.5)",
           shadowOffset: {
@@ -311,37 +311,14 @@ const Canvas = ({ onSubmitDraw, word }) => {
           shadowOpacity: 0.34,
           shadowRadius: 6.27,
           elevation: 10,
+          zIndex: 2,
         }}>
-        <View
-          style={{
-            position: "absolute",
-            left: 20,
-            right: 20,
-            top: -20,
-            zIndex: 2,
-            backgroundColor: "white",
-            paddingVertical: 20,
-            paddingHorizontal: 20,
-            borderRadius: 30,
-            flexDirection: "row",
-            justifyContent: "space-around",
-            alignItems: "center",
-            shadowColor: "rgba(0, 0, 0, 0.5)",
-            shadowOffset: {
-              width: 0,
-              height: 5,
-            },
-            shadowOpacity: 0.34,
-            shadowRadius: 6.27,
-            elevation: 10,
-          }}>
-          <ColorPicker onColorChange={handleColorChange} />
-        </View>
         <CanvasTools
           onSaveDrawing={handleSaveDrawing}
           onEraser={handleEraser}
           onClearCanvas={handleClearCanvas}
           onStrokeSizeChange={handleStrokeSizeChange}
+          onColorChange={handleColorChange}
         />
         <View
           style={{

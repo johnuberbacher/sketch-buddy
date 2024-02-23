@@ -6,7 +6,8 @@ import WORDS from "../constants/words";
 import COLORS from "../constants/colors";
 
 const randomIndex = Math.floor(Math.random() * WORDS.length);
-const staticWord = WORDS[randomIndex].word;
+// const staticWord = "WORDS[randomIndex].word";
+const staticWord = "spider";
 const difficulty = WORDS[randomIndex].difficulty;
 let difficultyLength = 12;
 const emptyButtons = Array(staticWord.length).fill(null);
@@ -18,7 +19,7 @@ const shuffleArray = (array) => {
   }
 };
 
-const LetterBoard = () => {
+const LetterBoard = ({ props, onGuessCorrect }) => {
   const [optionLetters, setOptionLetters] = useState([]);
   const [answerLetters, setAnswerLetters] = useState([]);
   const [isSelected, setIsSelected] = useState(Array(12).fill(false));
@@ -137,10 +138,6 @@ const LetterBoard = () => {
         return prevSelectedStatus;
       });
     }
-
-    if (answerLetters === staticWord) {
-      console.log("YAY! You got it!");
-    }
   };
 
   const handleSelectedLetterClick = (title, index) => {
@@ -191,44 +188,70 @@ const LetterBoard = () => {
     victoryStyles,
   ]);
 
+  useEffect(() => {
+    const checkAnswerAndPerformAction = async () => {
+      if (answerLetters.join("") === staticWord) {
+        console.log("YAY! You got it!");
+        setVictoryStyles({
+          backgroundColor: "green",
+          color: "white",
+        });
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        onGuessCorrect();
+      } else {
+        setVictoryStyles({});
+      }
+    };
+
+    checkAnswerAndPerformAction();
+  }, [answerLetters, staticWord]);
+
   return (
     <>
       <View style={wrapperStyles}>
         {answerLetters.map((letter, index) => (
           <LetterButton
-            color="yellow"
+            color="secondary"
             key={index}
             title={letter}
             onPress={() => handleSelectedLetterClick(letter, index)}
           />
         ))}
         {emptyButtons.slice(answerLetters.length).map((_, index) => (
-          <LetterButton color="yellow" key={index} filled={false} />
+          <LetterButton color="secondary" key={index} filled={false} />
         ))}
       </View>
-      <View style={styles.topRow}>
-        {optionLetters.slice(0, difficultyLength / 2).map((title, index) => (
-          <LetterButton
-            key={index}
-            title={title}
-            selected={isSelected[index]}
-            onPress={() => handleLetterButtonClick(title, index)}
-          />
-        ))}
-      </View>
-      <View style={styles.secondRow}>
-        {optionLetters
-          .slice(difficultyLength / 2, difficultyLength)
-          .map((title, index) => (
+      <View
+        style={{
+          gap: 10,
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexDirection: "column",
+        }}>
+        <View style={styles.topRow}>
+          {optionLetters.slice(0, difficultyLength / 2).map((title, index) => (
             <LetterButton
-              key={index + 6}
+              key={index}
               title={title}
-              selected={isSelected[index + difficultyLength / 2]}
-              onPress={() =>
-                handleLetterButtonClick(title, index + difficultyLength / 2)
-              }
+              selected={isSelected[index]}
+              onPress={() => handleLetterButtonClick(title, index)}
             />
           ))}
+        </View>
+        <View style={styles.secondRow}>
+          {optionLetters
+            .slice(difficultyLength / 2, difficultyLength)
+            .map((title, index) => (
+              <LetterButton
+                key={index + 6}
+                title={title}
+                selected={isSelected[index + difficultyLength / 2]}
+                onPress={() =>
+                  handleLetterButtonClick(title, index + difficultyLength / 2)
+                }
+              />
+            ))}
+        </View>
       </View>
       <View
         style={{
@@ -247,11 +270,14 @@ const LetterBoard = () => {
 const styles = StyleSheet.create({
   wrapperStyles: {
     width: "100%",
-    backgroundColor: COLORS.primary,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     gap: 10,
+    paddingBottom: 20,
+  },
+  victoryStyles: {
+    backgroundColor: COLORS.red,
   },
   wrapperVictoryStyles: {
     backgroundColor: "#ade053",
@@ -264,16 +290,16 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "stretch",
-    gap: 4,
+    flexWrap: "nowrap",
+    alignItems: "center",
+    gap: 10,
   },
   secondRow: {
-    marginTop: 15,
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "stretch",
-    gap: 4,
+    alignItems: "center",
+    gap: 10,
   },
   wrapperVictoryStyles: {
     backgroundColor: "#ade053",

@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    elevation: 0,
+    elevation: 2,
   },
   overlayTitle: {
     width: "100%",
