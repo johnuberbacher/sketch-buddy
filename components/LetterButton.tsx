@@ -22,11 +22,11 @@ const LetterButton = (props) => {
   };
   const buttonInnerStyles = StyleSheet.flatten([
     styles.buttonInner,
-    isPressed && !props.selected && styles.buttonInnerPressed,
-    props.selected && styles.buttonInnerSelected,
     {
       backgroundColor: props.selected ? props.selected : baseColor,
     },
+    isPressed && !props.selected && styles.buttonInnerPressed,
+    props.selected && styles.buttonInnerSelected,
   ]);
 
   return (
@@ -61,14 +61,13 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     elevation: 2,
   },
-  buttonInnerPressed: {
-  },
+  buttonInnerPressed: {},
   buttonInnerSelected: {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
-    backgroundColor: COLORS.primary,
+    backgroundColor: "lightgray",
     aspectRatio: 1,
     width: "100%",
     height: "100%",

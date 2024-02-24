@@ -49,13 +49,13 @@ const ChooseWord = ({ selectedGame, onClose }) => {
     }
   }
 
-  async function updateGameWord(word: string) {
+  async function updateGameWord(word: string, difficulty: string) {
     try {
       setLoading(true);
 
       const { data, error } = await supabase
         .from("games")
-        .update({ word: word })
+        .update({ word: word, difficulty: difficulty })
         .eq("id", selectedGame.id)
         .select();
 
@@ -111,7 +111,7 @@ const ChooseWord = ({ selectedGame, onClose }) => {
                 reward={index + 1}
                 key={word.word}
                 onPress={() => {
-                  updateGameWord(word.word);
+                  updateGameWord(word.word, word.difficulty);
                 }}
               />
             </View>

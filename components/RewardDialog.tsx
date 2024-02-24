@@ -12,7 +12,7 @@ import COLORS from "../constants/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 
-const RewardDialog = (props) => {
+const RewardDialog = ({ difficulty, onClose }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -100,12 +100,22 @@ const RewardDialog = (props) => {
                   justifyContent: "center",
                   paddingLeft: 5,
                 }}>
-                {Array.from({ length: props.reward }, (_, index) => (
-                  <ImageBackground
-                    style={{ width: 30, height: 30, marginLeft: -5 }}
-                    source={require("../assets/c.png")}
-                    resizeMode={"contain"}></ImageBackground>
-                ))}
+                {Array.from(
+                  {
+                    length:
+                      difficulty === "easy"
+                        ? 1
+                        : difficulty === "medium"
+                        ? 2
+                        : 3,
+                  },
+                  (_, index) => (
+                    <ImageBackground
+                      style={{ width: 30, height: 30, marginLeft: -5 }}
+                      source={require("../assets/c.png")}
+                      resizeMode={"contain"}></ImageBackground>
+                  )
+                )}
               </View>
             </View>
             <View
@@ -118,7 +128,7 @@ const RewardDialog = (props) => {
                 color="primary"
                 title="Continue"
                 onPress={() => {
-                  props.onClose();
+                  onClose();
                 }}
               />
             </View>

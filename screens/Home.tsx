@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ImageBackground,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { supabase } from "../lib/supabase";
 import React, { useState, useEffect, useLayoutEffect } from "react";
@@ -29,6 +30,7 @@ const Home = ({ route }) => {
   const [isChooseWordVisibleModal, setIsChooseWordModalVisible] =
     useState(false);
   const [selectedGame, setSelectedGame] = useState();
+  const [refreshing, setRefreshing] = React.useState(false);
 
   const playGame = async (game) => {
     setSelectedGame(game);
@@ -37,10 +39,17 @@ const Home = ({ route }) => {
       setIsChooseWordModalVisible(true);
     } else {
       setLoading(true);
+
+      let route = game.action.toString();
+      route = route.charAt(0).toUpperCase() + route.slice(1);
+
       await new Promise((resolve) => setTimeout(resolve, 2000));
+
       navigation.reset({
         index: 0,
-        routes: [{ name: "Draw", params: { word: game.word } }],
+        routes: [
+          { name: route, params: { game: game, user: session?.user.id } },
+        ],
       });
       setLoading(false);
     }
@@ -48,8 +57,6 @@ const Home = ({ route }) => {
 
   async function fetchData() {
     try {
-      setLoading(true);
-
       // Load profile data
       const { data: profileData } = await supabase
         .from("profiles")
@@ -73,8 +80,14 @@ const Home = ({ route }) => {
       alert(error.message);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchData();
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -88,6 +101,7 @@ const Home = ({ route }) => {
   }, [gamesData]);
 
   useEffect(() => {
+    setLoading(true);
     fetchData();
   }, []);
 
@@ -263,7 +277,13 @@ const Home = ({ route }) => {
                   width: "100%",
                   flexDirection: "column",
                   gap: 20,
-                }}>
+                }}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                  />
+                }>
                 {gamesData.map((game) => (
                   <View key={game.id} style={styles.menuInner}>
                     <View
@@ -327,8 +347,8 @@ const Home = ({ route }) => {
                           }}>
                           <Text selectable={false} style={styles.usernameTitle}>
                             {game.user1 === session.user.id
-                              ? game.user2
-                              : game.user1}
+                              ? game.user2username
+                              : game.user1username}
                           </Text>
                         </View>
                       </View>

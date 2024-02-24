@@ -2,16 +2,8 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import LetterButton from "../components/LetterButton";
 import Button from "../components/Button";
-import WORDS from "../constants/words";
 import COLORS from "../constants/colors";
 import { Audio } from "expo-av";
-
-const randomIndex = Math.floor(Math.random() * WORDS.length);
-// const staticWord = "WORDS[randomIndex].word";
-const staticWord = "spider";
-const difficulty = WORDS[randomIndex].difficulty;
-let difficultyLength = 12;
-const emptyButtons = Array(staticWord.length).fill(null);
 
 const shuffleArray = (array) => {
   for (let i = array.length - 1; i > 0; i--) {
@@ -20,37 +12,33 @@ const shuffleArray = (array) => {
   }
 };
 
-const LetterBoard = ({ props, onGuessCorrect }) => {
+const LetterBoard = ({ word, difficulty, onGuessCorrect }) => {
   const [optionLetters, setOptionLetters] = useState([]);
   const [answerLetters, setAnswerLetters] = useState([]);
   const [isSelected, setIsSelected] = useState(Array(12).fill(false));
   const [victoryStyles, setVictoryStyles] = useState(null);
 
+  let difficultyLength = 12;
+  const emptyButtons = Array(word.length).fill(null);
+
   useEffect(() => {
-    const staticWordFrequencyMap = new Map(
-      [...staticWord].map((char) => [char, 1])
-    );
+    const staticWordFrequencyMap = new Map([...word].map((char) => [char, 1]));
     const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
     // Ensure that staticWord letters are included in optionLetters
     const staticWordLetters = generateCharactersFromFrequency(
       staticWordFrequencyMap,
-      staticWord.length
+      word.length
     );
 
     const usedChars = new Set([...staticWordLetters]);
-    console.log(difficulty);
-    if (difficulty === "medium") {
-      difficultyLength = 14;
-    } else if (difficulty === "hard") {
-      difficultyLength = 16;
+    if (difficulty === "medium" || difficulty === "hard") {
+      console.log(difficulty);
+      difficultyLength = 12;
     }
 
-    console.log(staticWord);
-    console.log(difficulty);
-
     const randomLetters = Array.from(
-      { length: difficultyLength - staticWord.length },
+      { length: difficultyLength - word.length },
       () => {
         let randomChar;
         do {
@@ -64,7 +52,7 @@ const LetterBoard = ({ props, onGuessCorrect }) => {
     const combinedLetters = staticWordLetters.concat(randomLetters);
     shuffleArray(combinedLetters);
     setOptionLetters(combinedLetters);
-  }, [staticWord]);
+  }, [word]);
 
   const generateCharactersFromFrequency = (frequencyMap, totalCharacters) => {
     const characters = [];
@@ -191,7 +179,7 @@ const LetterBoard = ({ props, onGuessCorrect }) => {
 
   useEffect(() => {
     const checkAnswerAndPerformAction = async () => {
-      if (answerLetters.join("") === staticWord) {
+      if (answerLetters.join("") === word) {
         const { sound } = await Audio.Sound.createAsync(
           require("./../assets/sfx/correct.mp3")
         );
@@ -208,7 +196,7 @@ const LetterBoard = ({ props, onGuessCorrect }) => {
     };
 
     checkAnswerAndPerformAction();
-  }, [answerLetters, staticWord]);
+  }, [answerLetters, word]);
 
   return (
     <>

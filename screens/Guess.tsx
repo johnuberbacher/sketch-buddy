@@ -17,12 +17,78 @@ import COLORS from "../constants/colors";
 import NewButton from "../components/NewButton";
 import Modal from "../components/Modal";
 import RewardDialog from "../components/RewardDialog";
+import Loading from "../components/Loading";
+import { supabase } from "../lib/supabase";
 
 const Guess = ({ route, navigation }) => {
   const [isRewardDialogVisible, setIsRewardDialogVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { game, user } = route.params;
 
-  const staticword = "spider";
-  const reward = 3;
+  useEffect(() => {
+    if (game.word) {
+      setLoading(false);
+    }
+  }, []);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+
+  async function updateGameTurn() {
+    try {
+      setLoading(true);
+
+      const turn = game.user1 === user ? game.user2 : game.user1;
+
+      const { data, error } = await supabase
+        .from("games")
+        .update({ word: null, turn: turn, action: "draw" })
+        .eq("id", game.id)
+        .select();
+
+      if (error) {
+        throw new Error("Error updating game turn");
+      }
+      setLoading(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message);
+      }
+    }
+  }
+
+  async function updateUserStats() {
+    try {
+      setLoading(true);
+
+      const reward = game.difficulty === "easy" ? 1 : game.difficulty === "medium" ? 2 : 3;
+      console.log(reward)
+      const { data, error } = await supabase
+        .from("profiles")
+        .update({ coins: reward })
+        .increment('coins')
+        .match({ id: game.user1 });
+
+      const { data2, error2 } = await supabase
+        .from("profiles")
+        .update({ coins: reward })
+        .increment('coins')
+        .match({ id: game.user2 });
+
+      if (error || error2) {
+        throw new Error("Error updating game turn");
+      }
+      setLoading(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message);
+      }
+    }
+  }
+
   const responses = [
     "You really know how to sketch out the correct answer!",
     "That's the right sketch of things!",
@@ -36,14 +102,9 @@ const Guess = ({ route, navigation }) => {
     "Your mental sketchpad is filled with the right answers!",
   ];
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, [navigation]);
-
-  const toggleRewardDialogVisible = () => {
-    setIsRewardDialogVisible(!isRewardDialogVisible);
+  const handleGuessCorrect = async () => {
+    updateGameTurn();
+    setIsRewardDialogVisible(true);
   };
 
   const onRewardDialog = () => {
@@ -56,11 +117,15 @@ const Guess = ({ route, navigation }) => {
 
   return (
     <>
+      {loading && <Loading />}
       {isRewardDialogVisible && (
         <Modal
           props=""
           title={responses[Math.floor(Math.random() * responses.length)]}>
-          <RewardDialog onClose={() => onRewardDialog()} reward={reward} />
+          <RewardDialog
+            onClose={() => onRewardDialog()}
+            difficulty={game.difficulty}
+          />
         </Modal>
       )}
       <View
@@ -152,7 +217,7 @@ const Guess = ({ route, navigation }) => {
                     textShadowOffset: { width: 0, height: 2 },
                     textShadowRadius: 4,
                   }}>
-                  {staticword}
+                  {game.word}
                 </Text>
                 <Text
                   selectable={false}
@@ -218,8 +283,9 @@ const Guess = ({ route, navigation }) => {
             elevation: 10,
           }}>
           <LetterBoard
-            staticWord="spider"
-            onGuessCorrect={toggleRewardDialogVisible}
+            word={game.word}
+            difficulty={game.difficulty}
+            onGuessCorrect={handleGuessCorrect}
           />
           <View
             style={{
@@ -229,7 +295,7 @@ const Guess = ({ route, navigation }) => {
             <NewButton
               title="Help"
               onPress={() => {
-                navigation.navigate("Home");
+                //
               }}
             />
           </View>
