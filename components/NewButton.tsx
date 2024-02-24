@@ -3,7 +3,8 @@ import {
   View,
   Text,
   StyleSheet,
-  ImageBackground,TouchableOpacity, 
+  ImageBackground,
+  TouchableOpacity,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import COLORS from "../constants/colors";
@@ -28,20 +29,11 @@ const Button = (props) => {
     },
   ]);
 
-  useEffect(() => {
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [sound]);
-
   const handlePressIn = async () => {
     setIsPressed(true);
     const { sound } = await Audio.Sound.createAsync(
-      require("./../assets/sfx/sfx01.mp3")
+      require("./../assets/sfx/click.mp3")
     );
-    setSound(sound);
     await sound.playAsync();
   };
 

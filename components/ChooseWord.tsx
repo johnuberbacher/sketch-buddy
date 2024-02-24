@@ -1,15 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
 import NewButton from "./NewButton";
 import COLORS from "../constants/colors";
 import { supabase } from "../lib/supabase";
 import { useNavigation } from "@react-navigation/native";
 
-const ChooseWord = (props) => {
+const ChooseWord = ({ selectedGame, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [remoteData, setRemoteData] = useState([]);
   const navigation = useNavigation();
@@ -17,43 +13,31 @@ const ChooseWord = (props) => {
   async function fetchWords() {
     try {
       setLoading(true);
-
-      const easyWord = await supabase
+      
+      const { data, error } = await supabase
         .from("words")
-        .select("word, difficulty")
-        .eq("difficulty", "easy")
-        .limit(1)
-        .single();
-      const mediumWord = await supabase
-        .from("words")
-        .select("word, difficulty")
-        .eq("difficulty", "medium")
-        .limit(1)
-        .single();
-      const hardWord = await supabase
-        .from("words")
-        .select("word, difficulty")
-        .eq("difficulty", "hard")
-        .limit(1)
-        .single();
+        .select("word, difficulty");
 
-      const data = [easyWord, mediumWord, hardWord];
+      console.log(data);
 
-      if (data.some((item) => item.error && item.status !== 406)) {
-        console.error(
-          "Error fetching data:",
-          data.map((item) => item.error)
-        );
+      if (error) {
+        console.error("Error fetching data:", error.message);
         throw new Error("Error fetching data");
       }
 
-      console.log("Data fetched successfully:", data);
-      setRemoteData(data);
+      console.log("ChooseWord: Data fetched successfully");
 
-      // If you want to access individual fields from each word, you can do something like:
-      // const easyWordData = easyWord?.data;
-      // const mediumWordData = mediumWord?.data;
-      // const hardWordData = hardWord?.data;
+      const getRandomEntry = (arr) =>
+        arr[Math.floor(Math.random() * arr.length)];
+
+      const randomWords = [
+        getRandomEntry(data.filter((entry) => entry.difficulty === "easy")),
+        getRandomEntry(data.filter((entry) => entry.difficulty === "medium")),
+        getRandomEntry(data.filter((entry) => entry.difficulty === "hard")),
+      ];
+
+
+      setRemoteData(randomWords);
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error in fetchWords:", error.message);
@@ -61,20 +45,39 @@ const ChooseWord = (props) => {
       }
     } finally {
       setLoading(false);
-      console.log("Loading state set to false.");
+      console.log("ChooseWord: Loading state set to false.");
     }
   }
 
-  const selectWord = (word, reward) => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Draw", params: { word: word, reward: reward } }],
-    });
-    props.onClose();
-  };
+  async function updateGameWord(word: string) {
+    try {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from("games")
+        .update({ word: word })
+        .eq("id", selectedGame.id)
+        .select();
+
+      if (error) {
+        console.error("Error updating game word:", error);
+        throw new Error("Error updating game word");
+      }
+
+      console.log("Game word updated successfully");
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error in updateGameWord:", error.message);
+        alert(error.message);
+      }
+    } finally {
+      selectedGame.word = word;
+      setLoading(false);
+      onClose();
+    }
+  }
 
   useEffect(() => {
-    //  if (session) getProfile();
     fetchWords();
   }, []);
 
@@ -97,18 +100,18 @@ const ChooseWord = (props) => {
         <>
           {remoteData.map((word, index) => (
             <View
-              key={word.data.word}
+              key={word.word}
               style={{
                 width: "100%",
                 flexDirection: "row",
               }}>
               <NewButton
                 color="primary"
-                title={word.data.word}
+                title={word.word}
                 reward={index + 1}
-                key={word.data.word}
+                key={word.word}
                 onPress={() => {
-                  selectWord(word.data.word, index);
+                  updateGameWord(word.word);
                 }}
               />
             </View>

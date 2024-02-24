@@ -4,6 +4,7 @@ import LetterButton from "../components/LetterButton";
 import Button from "../components/Button";
 import WORDS from "../constants/words";
 import COLORS from "../constants/colors";
+import { Audio } from "expo-av";
 
 const randomIndex = Math.floor(Math.random() * WORDS.length);
 // const staticWord = "WORDS[randomIndex].word";
@@ -191,7 +192,10 @@ const LetterBoard = ({ props, onGuessCorrect }) => {
   useEffect(() => {
     const checkAnswerAndPerformAction = async () => {
       if (answerLetters.join("") === staticWord) {
-        console.log("YAY! You got it!");
+        const { sound } = await Audio.Sound.createAsync(
+          require("./../assets/sfx/correct.mp3")
+        );
+        await sound.playAsync();
         setVictoryStyles({
           backgroundColor: "green",
           color: "white",

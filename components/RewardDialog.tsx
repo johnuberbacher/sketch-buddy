@@ -6,13 +6,25 @@ import {
   ActivityIndicator,
 } from "react-native";
 import NewButton from "../components/NewButton";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Avatar from "../components/Avatar";
 import COLORS from "../constants/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Audio } from "expo-av";
 
 const RewardDialog = (props) => {
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const playSound = async () => {
+      const { sound } = await Audio.Sound.createAsync(
+        require("./../assets/sfx/reward.mp3")
+      );
+      await sound.playAsync();
+    };
+
+    playSound();
+  }, []);
 
   return (
     <>

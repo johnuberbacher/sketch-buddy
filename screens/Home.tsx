@@ -7,32 +7,74 @@ import {
   ImageBackground,
   Alert,
 } from "react-native";
+import { supabase } from "../lib/supabase";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import Nav from "../components/Nav";
 import NewButton from "../components/NewButton";
 import COLORS from "../constants/colors";
 import Avatar from "../components/Avatar";
 import { useNavigation } from "@react-navigation/native";
-import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
 import ChooseWord from "../components/ChooseWord";
 import Modal from "../components/Modal";
 
-export default function Home({ session }: { session: Session }) {
+const Home = ({ route }) => {
+  // Accessing the parameters from initialParams
+  const { key, session } = route.params;
   const [loading, setLoading] = useState(true);
-  const [remoteData, setRemoteData] = useState<any[]>([]);
-  const [sortedData, setSortedData] = useState<any[]>([]);
-  const [username, setUsername] = useState("juberbacher");
+  const [gamesData, setGamesData] = useState<any[]>([]);
+  const [coins, setCoins] = useState(0);
+  const [rank, setRank] = useState(0);
   const navigation = useNavigation();
   const [isChooseWordVisibleModal, setIsChooseWordModalVisible] =
     useState(false);
+  const [selectedGame, setSelectedGame] = useState();
 
-  const toggleChooseWordModalVisibility = () => {
-    setIsChooseWordModalVisible(!isChooseWordVisibleModal);
+  const playGame = async (game) => {
+    setSelectedGame(game);
+
+    if (!game.word) {
+      setIsChooseWordModalVisible(true);
+    } else {
+      setLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Draw", params: { word: game.word } }],
+      });
+      setLoading(false);
+    }
   };
 
-  // fetch games where user1 or user2 === username
-  //
+  async function fetchData() {
+    try {
+      setLoading(true);
+
+      // Load profile data
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("id, username, rank, coins")
+        .eq("id", session?.user.id)
+        .single();
+      setRank(profileData.rank);
+      setCoins(profileData.coins);
+
+      // Load relevant games data
+      console.log("Fetching relevant data from 'games' table...");
+      const { data: relevantGamesData } = await supabase
+        .from("games")
+        .select("*")
+        .or(
+          "user1.eq." + session.user.id + ",user2.eq." + session.user.id + ""
+        );
+      setGamesData(relevantGamesData);
+    } catch (error) {
+      console.error("Error in fetchData:", error.message);
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -41,61 +83,12 @@ export default function Home({ session }: { session: Session }) {
   }, [navigation]);
 
   useEffect(() => {
-    // This block will run whenever sortedData is updated
-    console.log("Sorted data updated:", sortedData);
-  }, [sortedData]);
+    // This block will run whenever gamesData is updated
+    // console.log("Sorted data updated:", gamesData);
+  }, [gamesData]);
 
-  async function loadGames() {
-    try {
-      setLoading(true);
-      console.log("Fetching data from 'games' table...");
-
-      const { data, error, status } = await supabase.from("games").select("*");
-
-      if (error && status !== 406) {
-        console.error("Error fetching data:", error);
-        throw error;
-      }
-
-      if (data) {
-        console.log("Data fetched successfully:", data);
-        setRemoteData(data);
-
-        const sortedRemoteData = [...data].sort((a, b) => {
-          // Entries where 'turn' is equal to the specified username come first
-          if (a.turn === username && b.turn !== username) {
-            return -1;
-          }
-          if (a.turn !== username && b.turn === username) {
-            return 1;
-          }
-          // For other cases or if both have the same 'turn', maintain the original order
-          return 0;
-        });
-
-        setSortedData(sortedRemoteData);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error in loadGames:", error.message);
-        alert(error.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function getProfile() {
-    console.log('session', session)
-  }
-
-  // Call loadGames when the component mounts
   useEffect(() => {
-    if (session) {
-      console.log(session)
-     // getProfile();
-      loadGames();
-    }
+    fetchData();
   }, []);
 
   return (
@@ -123,7 +116,10 @@ export default function Home({ session }: { session: Session }) {
           <Nav />
           {isChooseWordVisibleModal && (
             <Modal props="" title="Choose a word to draw">
-              <ChooseWord onClose={() => toggleChooseWordModalVisibility()} />
+              <ChooseWord
+                selectedGame={selectedGame}
+                onClose={() => playGame(selectedGame)}
+              />
             </Modal>
           )}
           <View
@@ -145,7 +141,7 @@ export default function Home({ session }: { session: Session }) {
                   fontFamily: "Kanit-Bold",
                   color: COLORS.text,
                 }}>
-                Let's Play {String(session)}
+                Let's Play
               </Text>
               <ImageBackground
                 style={{
@@ -209,7 +205,7 @@ export default function Home({ session }: { session: Session }) {
                         fontFamily: "Kanit-Bold",
                         color: COLORS.text,
                       }}>
-                      1/100
+                      {rank ?? "null"}/100
                     </Text>
                   </View>
                 </View>
@@ -248,7 +244,7 @@ export default function Home({ session }: { session: Session }) {
                         fontFamily: "Kanit-Bold",
                         color: COLORS.text,
                       }}>
-                      600
+                      {coins ?? "null"}
                     </Text>
                   </View>
                 </View>
@@ -268,7 +264,7 @@ export default function Home({ session }: { session: Session }) {
                   flexDirection: "column",
                   gap: 20,
                 }}>
-                {sortedData.map((game) => (
+                {gamesData.map((game) => (
                   <View key={game.id} style={styles.menuInner}>
                     <View
                       style={{
@@ -330,12 +326,14 @@ export default function Home({ session }: { session: Session }) {
                             gap: 10,
                           }}>
                           <Text selectable={false} style={styles.usernameTitle}>
-                            {game.user1 === username ? game.user2 : game.user1}
+                            {game.user1 === session.user.id
+                              ? game.user2
+                              : game.user1}
                           </Text>
                         </View>
                       </View>
                     </View>
-                    {game.turn === username && (
+                    {game.turn === session.user.id && (
                       <View
                         style={{
                           height: 40,
@@ -348,7 +346,7 @@ export default function Home({ session }: { session: Session }) {
                           title="Play"
                           size="small"
                           onPress={() => {
-                            toggleChooseWordModalVisibility();
+                            playGame(game);
                           }}
                           color="green"
                         />
@@ -368,7 +366,7 @@ export default function Home({ session }: { session: Session }) {
                   color="secondary"
                   title="Create a New Game"
                   onPress={() => {
-                    toggleChooseWordModalVisibility();
+                    playGame("");
                   }}
                 />
               </View>
@@ -378,7 +376,7 @@ export default function Home({ session }: { session: Session }) {
       )}
     </>
   );
-}
+};
 
 const styles = StyleSheet.create({
   menu: {
@@ -438,3 +436,5 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
   },
 });
+
+export default Home;

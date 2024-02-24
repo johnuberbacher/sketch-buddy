@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: "rgba(0,0,0,0.25)",
     zIndex: 10,
-    padding: 40,
+    padding: 20,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",

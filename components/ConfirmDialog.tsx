@@ -1,12 +1,24 @@
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import NewButton from "../components/NewButton";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Avatar from "../components/Avatar";
 import COLORS from "../constants/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Audio } from "expo-av";
 
 const ConfirmDialog = (props) => {
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const playSound = async () => {
+      const { sound } = await Audio.Sound.createAsync(
+        require("./../assets/sfx/dialog.mp3")
+      );
+      await sound.playAsync();
+    };
+
+    playSound();
+  }, []);
 
   return (
     <>
@@ -47,13 +59,13 @@ const ConfirmDialog = (props) => {
                 }}>
                 <Avatar />
               </View>
-          <View style={{}}>
-            <MaterialCommunityIcons
-              name="transfer-right"
-              size={30}
-              color={COLORS.primary}
-            />
-          </View>
+              <View style={{}}>
+                <MaterialCommunityIcons
+                  name="transfer-right"
+                  size={30}
+                  color={COLORS.primary}
+                />
+              </View>
               <View
                 style={{
                   width: 80,

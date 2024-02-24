@@ -19,6 +19,7 @@ const Landing = () => {
   const navigation = useNavigation();
   const [session, setSession] = useState<Session | null>(null);
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -39,6 +40,7 @@ const Landing = () => {
     const { error } = await supabase.auth.signUp({
       email: email,
       password: password,
+      options: { data: { username: username } },
     });
 
     if (error) Alert.alert(error.message);
@@ -86,7 +88,7 @@ const Landing = () => {
             width: 200,
             height: 170,
             marginHorizontal: "auto",
-            marginBottom: -60,
+            marginBottom: -20,
           }}
           source={require("../assets/fox.png")}
           resizeMode={"cover"}></ImageBackground>
@@ -97,7 +99,7 @@ const Landing = () => {
           blurRadius={5}
           resizeMode="cover">
           <View style={styles.overlayInner}>
-            <View
+            {/*<View
               style={{
                 width: "100%",
                 flexDirection: "row",
@@ -114,7 +116,35 @@ const Landing = () => {
                 height: 1,
                 width: "100%",
                 backgroundColor: "rgba(255,255,255,0.75)",
-              }}></View>
+              }}></View>*/}
+            <View
+              style={{
+                width: "100%",
+                flexDirection: "row",
+              }}>
+              <TextInput
+                style={{
+                  width: "100%",
+                  color: COLORS.text,
+                  fontSize: 20,
+                  fontFamily: "Kanit-SemiBold",
+                  paddingLeft: 20,
+                  paddingRight: 20,
+                  paddingVertical: 15,
+                  gap: 40,
+                  backgroundColor: "rgba(255,255,255,0.5)",
+                  borderWidth: 1,
+                  borderColor: "rgba(255,255,255,1.0)",
+                  borderStyle: "solid",
+                  borderRadius: 40,
+                  elevation: 0,
+                }}
+                onChangeText={(text) => setUsername(text)}
+                value={username}
+                placeholder="Username"
+                autoCapitalize={"none"}
+              />
+            </View>
             <View
               style={{
                 width: "100%",
@@ -139,7 +169,7 @@ const Landing = () => {
                 }}
                 onChangeText={(text) => setEmail(text)}
                 value={email}
-                placeholder="email@address.com"
+                placeholder="Email address"
                 autoCapitalize={"none"}
               />
             </View>
@@ -168,7 +198,7 @@ const Landing = () => {
                 onChangeText={(text) => setPassword(text)}
                 value={password}
                 secureTextEntry={true}
-                placeholder="password"
+                placeholder="Password"
                 autoCapitalize={"none"}
               />
             </View>
@@ -178,14 +208,11 @@ const Landing = () => {
                 flexDirection: "row",
                 gap: 10,
               }}>
-              <NewButton
-                title="Sign Up"
-                onPress={() => signUpWithEmail()}
-              />
+              <NewButton title="Sign Up" onPress={() => signUpWithEmail()} />
               <NewButton
                 title="Login"
                 color="primary"
-                onPress={() => signInWithEmail()} 
+                onPress={() => signInWithEmail()}
               />
             </View>
           </View>
