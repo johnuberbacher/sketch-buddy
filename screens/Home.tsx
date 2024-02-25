@@ -18,24 +18,33 @@ import { useNavigation } from "@react-navigation/native";
 import { Session } from "@supabase/supabase-js";
 import ChooseWord from "../components/ChooseWord";
 import Modal from "../components/Modal";
+import CreateGame from "../components/CreateGame";
 
 const Home = ({ route }) => {
   // Accessing the parameters from initialParams
   const { key, session } = route.params;
   const [loading, setLoading] = useState(true);
   const [gamesData, setGamesData] = useState<any[]>([]);
-  const [coins, setCoins] = useState(0);
-  const [rank, setRank] = useState(0);
+  const [currentUserData, setCurrentUserData] = useState<any>();
   const navigation = useNavigation();
   const [isChooseWordVisibleModal, setIsChooseWordModalVisible] =
+    useState(false);
+  const [isCreateGameModalVisible, setIsCreateGameModalVisible] =
     useState(false);
   const [selectedGame, setSelectedGame] = useState();
   const [refreshing, setRefreshing] = React.useState(false);
 
+  const createGame = async () => {
+    setIsCreateGameModalVisible(true);
+  };
+
   const playGame = async (game) => {
+    console.log("playGame");
+    console.log(game);
     setSelectedGame(game);
 
     if (!game.word) {
+      setIsCreateGameModalVisible(false);
       setIsChooseWordModalVisible(true);
     } else {
       setLoading(true);
@@ -62,9 +71,10 @@ const Home = ({ route }) => {
         .from("profiles")
         .select("id, username, rank, coins")
         .eq("id", session?.user.id)
+        .limit(1)
         .single();
-      setRank(profileData.rank);
-      setCoins(profileData.coins);
+
+      setCurrentUserData(profileData);
 
       // Load relevant games data
       console.log("Fetching relevant data from 'games' table...");
@@ -74,7 +84,15 @@ const Home = ({ route }) => {
         .or(
           "user1.eq." + session.user.id + ",user2.eq." + session.user.id + ""
         );
-      setGamesData(relevantGamesData);
+        console.log('yooooyoyoyoyoy')
+        console.log(relevantGamesData)
+      const sortedGamesData = relevantGamesData.sort(
+        (a, b): number =>
+          (b.turn === session.user.id ? 1 : 0) -
+          (a.turn === session.user.id ? 1 : 0)
+      );
+
+      setGamesData(sortedGamesData);
     } catch (error) {
       console.error("Error in fetchData:", error.message);
       alert(error.message);
@@ -94,11 +112,6 @@ const Home = ({ route }) => {
       headerShown: false,
     });
   }, [navigation]);
-
-  useEffect(() => {
-    // This block will run whenever gamesData is updated
-    // console.log("Sorted data updated:", gamesData);
-  }, [gamesData]);
 
   useEffect(() => {
     setLoading(true);
@@ -128,6 +141,15 @@ const Home = ({ route }) => {
       ) : (
         <>
           <Nav />
+          {isCreateGameModalVisible && (
+            <Modal props="" title="Challenge someone to a game">
+              <CreateGame
+                currentUserData={currentUserData}
+                onClose={() => setIsCreateGameModalVisible(false)}
+                onPlayGame={(game) => playGame(game)}
+              />
+            </Modal>
+          )}
           {isChooseWordVisibleModal && (
             <Modal props="" title="Choose a word to draw">
               <ChooseWord
@@ -219,7 +241,7 @@ const Home = ({ route }) => {
                         fontFamily: "Kanit-Bold",
                         color: COLORS.text,
                       }}>
-                      {rank ?? "null"}/100
+                      {currentUserData.rank ?? "null"}/100
                     </Text>
                   </View>
                 </View>
@@ -258,7 +280,7 @@ const Home = ({ route }) => {
                         fontFamily: "Kanit-Bold",
                         color: COLORS.text,
                       }}>
-                      {coins ?? "null"}
+                      {currentUserData.coins ?? "null"}
                     </Text>
                   </View>
                 </View>
@@ -327,7 +349,7 @@ const Home = ({ route }) => {
                         style={{
                           width: 60,
                         }}>
-                        <Avatar />
+                        <Avatar level="null" />
                       </View>
                       <View
                         style={{
@@ -386,7 +408,7 @@ const Home = ({ route }) => {
                   color="secondary"
                   title="Create a New Game"
                   onPress={() => {
-                    playGame("");
+                    createGame();
                   }}
                 />
               </View>

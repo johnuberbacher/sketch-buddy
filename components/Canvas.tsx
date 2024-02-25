@@ -172,7 +172,7 @@ const Canvas = ({ onSubmitDraw, word }) => {
                 backgroundColor: COLORS.secondary,
                 width: 100,
               }}>
-              <Avatar />
+              <Avatar level="null" />
             </View>
             <View
               style={{

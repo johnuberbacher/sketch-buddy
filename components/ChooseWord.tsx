@@ -53,11 +53,13 @@ const ChooseWord = ({ selectedGame, onClose }) => {
     try {
       setLoading(true);
 
+      console.log(selectedGame)
+      console.log("Updating game word:", word, difficulty)
+
       const { data, error } = await supabase
         .from("games")
         .update({ word: word, difficulty: difficulty })
-        .eq("id", selectedGame.id)
-        .select();
+        .eq("id", selectedGame.id);
 
       if (error) {
         console.error("Error updating game word:", error);
@@ -109,7 +111,7 @@ const ChooseWord = ({ selectedGame, onClose }) => {
                 color="primary"
                 title={word.word}
                 reward={index + 1}
-                key={word.word}
+                key={index}
                 onPress={() => {
                   updateGameWord(word.word, word.difficulty);
                 }}

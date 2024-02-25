@@ -57,7 +57,7 @@ const ConfirmDialog = (props) => {
                 style={{
                   width: 80,
                 }}>
-                <Avatar />
+                <Avatar level="null" />
               </View>
               <View style={{}}>
                 <MaterialCommunityIcons
@@ -70,7 +70,7 @@ const ConfirmDialog = (props) => {
                 style={{
                   width: 80,
                 }}>
-                <Avatar />
+                <Avatar level="null" />
               </View>
             </View>
             <Text

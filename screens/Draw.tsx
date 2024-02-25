@@ -34,8 +34,7 @@ const Draw = ({ route, navigation }) => {
       const { data, error } = await supabase
         .from("games")
         .update({ word: game.word, turn: turn, action: "guess" })
-        .eq("id", game.id)
-        .select();
+        .eq("id", game.id);
 
       if (error) {
         throw new Error("Error updating game turn");

@@ -40,7 +40,7 @@ const Nav = () => {
           <FlatButton onPress={toggleSettingsVisibility} />
         </View>
         <View style={{ width: 60, borderWidth: 0 }}>
-          <Avatar />
+          <Avatar level="null" />
         </View>
       </View>
     </>

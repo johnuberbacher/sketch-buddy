@@ -40,7 +40,7 @@ const Landing = () => {
     const { error } = await supabase.auth.signUp({
       email: email,
       password: password,
-      options: { data: { username: username } },
+      options: { data: { username: username, rank: 1, coins: 0 } },
     });
 
     if (error) Alert.alert(error.message);

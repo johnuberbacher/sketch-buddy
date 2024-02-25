@@ -63,13 +63,13 @@ const RewardDialog = ({ difficulty, onClose }) => {
                 style={{
                   width: 80,
                 }}>
-                <Avatar />
+                <Avatar level="null" />
               </View>
               <View
                 style={{
                   width: 80,
                 }}>
-                <Avatar />
+                <Avatar level="null" />
               </View>
             </View>
             <View

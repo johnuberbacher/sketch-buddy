@@ -20,6 +20,7 @@ import Home from "./screens/Home";
 import Draw from "./screens/Draw";
 import Guess from "./screens/Guess";
 import Landing from "./screens/Landing";
+import SignUp from "./screens/SignUp";
 import Leaderboard from "./screens/Leaderboard";
 import COLORS from "./constants/colors";
 import AudioPlayer from "./util/AudioPlayer";

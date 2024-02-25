@@ -10,13 +10,13 @@ import {
 import React, { useState } from "react";
 import COLORS from "../constants/colors";
 
-const Avatar = (props) => {
+const Avatar = ({ level }) => {
   const image = { uri: "https://avatars.githubusercontent.com/u/5966499?v=4" };
   const isWeb = Platform.OS === "web";
 
   return (
     <View
-      style={{ 
+      style={{
         flexDirection: "column",
         width: "100%",
         height: "auto",
@@ -24,58 +24,41 @@ const Avatar = (props) => {
         justifyContent: "center",
         position: "relative",
       }}>
-      {isWeb ? (
+      {level !== "null" && (
         <View
           style={{
             position: "absolute",
-            bottom: -3,
-            right: -3,
+            bottom: -5,
+            right: -5,
             zIndex: 1,
-            elevation: 1,
-            backgroundColor: COLORS.primary,
-            aspectRatio: 1,
-            borderRadius: 5,
-            paddingHorizontal: 4,
-            paddingVertical: 0,
+            width: "auto",
+            height: "auto",
+            borderRadius: 6,
             borderWidth: 4,
             borderColor: "white",
             borderStyle: "solid",
           }}>
           <Text
             style={{
-              marginTop: -3,
               fontSize: 13,
               fontFamily: "Kanit-Bold",
               textAlign: "center",
               color: "white",
+              borderRadius: 5,
+              backgroundColor: COLORS.primary,
+              paddingHorizontal: 5,
+              minWidth: 18,
             }}
             selectable={false}>
-            🇺🇸
-          </Text>
-        </View>
-      ) : (
-        <View
-          style={{
-            position: "absolute",
-            bottom: -3,
-            right: -3,
-            zIndex: 1,
-            elevation: 1,
-          }}>
-          <Text
-            style={{
-              fontSize: 20,
-              textAlign: "center",
-            }}
-            selectable={false}>
-            🇺🇸
+            {level}
           </Text>
         </View>
       )}
       <View style={styles.buttonInner}>
-        <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-          <Text style={{ ...styles.buttonText }}>{props.title}</Text>
-        </ImageBackground>
+        <ImageBackground
+          source={image}
+          resizeMode="cover"
+          style={styles.image}></ImageBackground>
       </View>
     </View>
   );
@@ -93,7 +76,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 15,
+    borderRadius: 10,
     aspectRatio: 1,
     width: "100%",
     height: "auto",
