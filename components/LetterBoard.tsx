@@ -33,7 +33,6 @@ const LetterBoard = ({ word, difficulty, onGuessCorrect }) => {
 
     const usedChars = new Set([...staticWordLetters]);
     if (difficulty === "medium" || difficulty === "hard") {
-      // console.log(difficulty);
       // difficultyLength = 14;
     }
 

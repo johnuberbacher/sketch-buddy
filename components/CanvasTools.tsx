@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import COLORS from "../constants/colors";
 
@@ -51,7 +56,7 @@ const CanvasTools = ({
 
   const [isToolbarVisisble, setIsToolbarVisisble] = useState(false);
   const [currentTool, setCurrentTool] = useState("stroke");
-  const [selectedStrokeSize, setSelectedStrokeSize] = useState(1);
+  const [selectedStrokeSize, setSelectedStrokeSize] = useState(16);
   const [selectedColor, setSelectedColor] = useState(colorArray[0]);
 
   const selectStrokeColor = (color) => {
@@ -98,105 +103,124 @@ const CanvasTools = ({
           paddingTop: 20,
         }}>
         {isToolbarVisisble ? (
-          <View
-            style={{
-              flex: 1,
-              marginBottom: 10,
-              position: "absolute",
-              left: 20,
-              right: 20,
-              bottom: "100%",
-              zIndex: 3,
-              backgroundColor: "rgba(255,255,255,0.95)",
-              borderWidth: 1,
-              borderColor: "rgba(255,255,255,1.0)",
-              borderStyle: "solid",
-              borderRadius: 40,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 5 },
-              shadowOpacity: 0.1,
-              shadowRadius: 20,
-              elevation: 10,
-            }}>
+          <>
             <View
               style={{
-                width: "100%",
                 flex: 1,
-                flexDirection: "row",
-                flexWrap: "wrap",
-                justifyContent: "space-around",
-                alignItems: "center",
-                padding: 20,
+                marginBottom: 10,
+                position: "absolute",
+                left: 20,
+                right: 20,
+                bottom: "100%",
+                zIndex: 3,
+                backgroundColor: "rgba(255,255,255,0.95)",
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,1.0)",
+                borderStyle: "solid",
+                borderRadius: 40,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 5 },
+                shadowOpacity: 0.1,
+                shadowRadius: 20,
+                elevation: 10,
               }}>
-              {currentTool === "stroke" ? (
-                <>
-                  {strokeArray.map((stroke) => (
-                    <TouchableOpacity
-                      key={stroke}
-                      onPress={() => selectStrokeSize(stroke)}
-                      style={[
-                        styles.box,
-                        {
-                          borderColor:
-                            selectedStrokeSize === stroke
-                              ? COLORS.secondary
-                              : "#FFFFFF",
-                        },
-                      ]}>
-                      <View
-                        style={[
-                          styles.stroke,
-                          {
-                            height: stroke,
-                            width: stroke,
-                          },
-                        ]}></View>
-                    </TouchableOpacity>
-                  ))}
-                </>
-              ) : null}
-              {currentTool === "color" ? (
-                <>
-                  {colorArray.map((color, index) => (
-                    <>
-                      {/* Dark Color */}
+              <View
+                style={{
+                  width: "100%",
+                  flex: 1,
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  padding: 10,
+                  gap: 5,
+                }}>
+                {currentTool === "stroke" ? (
+                  <>
+                    {strokeArray.map((stroke) => (
                       <TouchableOpacity
-                        key={color.dark}
-                        onPress={() => selectStrokeColor(color.dark)}
+                        key={stroke}
+                        onPress={() => selectStrokeSize(stroke)}
                         style={[
-                          styles.box,
+                          styles.strokeBox,
                           {
-                            backgroundColor: color.dark,
-                            opacity: selectedColor === color.dark ? 1 : 0.5,
                             borderColor:
-                              selectedColor === color.dark
+                              selectedStrokeSize === stroke
                                 ? COLORS.secondary
-                                : "#FFFFFF",
+                                : "transparent",
                           },
-                        ]}
-                      />
-                      {/* Base Color */}
-                      <TouchableOpacity
-                        key={color.base}
-                        onPress={() => selectStrokeColor(color.base)}
-                        style={[
-                          styles.box,
-                          {
-                            backgroundColor: color.base,
-                            opacity: selectedColor === color.base ? 1 : 0.5,
-                            borderColor:
-                              selectedColor === color.base
-                                ? COLORS.secondary
-                                : "#FFFFFF",
-                          },
-                        ]}
-                      />
-                    </>
-                  ))}
-                </>
-              ) : null}
+                        ]}>
+                        <View
+                          style={[
+                            styles.stroke,
+                            {
+                              height: stroke,
+                              width: stroke,
+                            },
+                          ]}></View>
+                      </TouchableOpacity>
+                    ))}
+                  </>
+                ) : null}
+                {currentTool === "color" ? (
+                  <>
+                    {colorArray.map((color, index) => (
+                      <>
+                        {/* Dark Color */}
+                        <TouchableOpacity
+                          key={color.dark}
+                          onPress={() => selectStrokeColor(color.dark)}
+                          style={[
+                            styles.box,
+                            {
+                              backgroundColor: color.dark,
+                              opacity: selectedColor === color.dark ? 1 : 0.5,
+                              borderColor:
+                                selectedColor === color.dark
+                                  ? COLORS.secondary
+                                  : "#FFFFFF",
+                            },
+                          ]}
+                        />
+                        {/* Base Color */}
+                        <TouchableOpacity
+                          key={color.base}
+                          onPress={() => selectStrokeColor(color.base)}
+                          style={[
+                            styles.box,
+                            {
+                              backgroundColor: color.base,
+                              opacity: selectedColor === color.base ? 1 : 0.5,
+                              borderColor:
+                                selectedColor === color.base
+                                  ? COLORS.secondary
+                                  : "#FFFFFF",
+                            },
+                          ]}
+                        />
+                        {/* Light Color */}
+                        <TouchableOpacity
+                          key={color.light}
+                          onPress={() => selectStrokeColor(color.light)}
+                          style={[
+                            styles.box,
+                            {
+                              backgroundColor: color.light,
+                              opacity: selectedColor === color.light ? 1 : 0.5,
+                              borderColor:
+                                selectedColor === color.light
+                                  ? COLORS.secondary
+                                  : "#FFFFFF",
+                            },
+                          ]}
+                        />
+                      </>
+                    ))}
+                  </>
+                ) : null}
+              </View>
             </View>
-          </View>
+          </>
         ) : null}
         <TouchableOpacity
           onPress={() => onColorPickerTool()}
@@ -263,12 +287,23 @@ const styles = StyleSheet.create({
     borderColor: "white",
     alignItems: "center",
     justifyContent: "center",
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
+  },
+  strokeBox: {
+    backgroundColor: "transparent",
+    borderRadius: 100,
+    borderWidth: 6,
+    borderColor: "transparent",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 50,
+    height: 50,
   },
   stroke: {
     borderRadius: 100,
-    backgroundColor: "white",
+    backgroundColor: "black",
   },
   buttonBackground: {
     flex: 1,

@@ -26,13 +26,11 @@ const Draw = ({ route, navigation }) => {
     });
   }, [navigation]);
 
-  const handleSubmitDrawing = async (paths, aspectRatio) => {
+  const handleSubmitDrawing = async (paths) => {
     try {
       setLoading(true);
 
       const turn = game.user1 === user ? game.user2 : game.user1;
-
-      console.log("the new aspect ratio is", aspectRatio);
 
       const { data, error } = await supabase
         .from("games")
@@ -41,7 +39,6 @@ const Draw = ({ route, navigation }) => {
           turn: turn,
           action: "guess",
           svg: paths,
-          aspectRatio: aspectRatio,
         })
         .eq("id", game.id);
 
@@ -99,8 +96,8 @@ const Draw = ({ route, navigation }) => {
               gap: 20,
             }}>
             <Canvas
-              onSubmitDraw={(paths, aspectRatio) =>
-                handleSubmitDrawing(paths, aspectRatio)
+              onSubmitDraw={(paths) =>
+                handleSubmitDrawing(paths)
               }
               word={game.word}
             />

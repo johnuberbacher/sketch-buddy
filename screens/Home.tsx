@@ -42,8 +42,6 @@ const Home = ({ route }) => {
   };
 
   const playGame = async (game) => {
-    console.log("playGame");
-    console.log(game);
     setSelectedGame(game);
 
     if (!game.word) {
@@ -80,15 +78,13 @@ const Home = ({ route }) => {
       setCurrentUserData(profileData);
 
       // Load relevant games data
-      console.log("Fetching relevant data from 'games' table...");
       const { data: relevantGamesData } = await supabase
         .from("games")
         .select("*")
         .or(
           "user1.eq." + session.user.id + ",user2.eq." + session.user.id + ""
         );
-      console.log("yooooyoyoyoyoy");
-      console.log(relevantGamesData);
+
       const sortedGamesData = relevantGamesData.sort(
         (a, b): number =>
           (b.turn === session.user.id ? 1 : 0) -
@@ -109,12 +105,6 @@ const Home = ({ route }) => {
     setRefreshing(true);
     fetchData();
   }, []);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, [navigation]);
 
   useEffect(() => {
     setLoading(true);
@@ -165,7 +155,7 @@ const Home = ({ route }) => {
           )}
           {isSettingsVisibleModal && (
             <Modal props="" title="Settings">
-              <Settings onClose={() => setIsSettingsVisibleModal(false)} />
+              <Settings onClose={() => setIsSettingsVisibleModal(false)} user={session.user.id}/>
             </Modal>
           )}
           <ScrollView

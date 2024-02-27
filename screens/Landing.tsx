@@ -26,7 +26,7 @@ const Landing = () => {
 
   async function signInWithEmail() {
     setLoading(true);
-    console.log({ email, password });
+    
     const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,

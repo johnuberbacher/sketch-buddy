@@ -27,7 +27,6 @@ const Guess = ({ route, navigation }) => {
   const [isRewardDialogVisible, setIsRewardDialogVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [drawingPaths, setDrawingPaths] = useState([]);
-  const [drawingAspectRatio, setDrawingAspectRatio] = useState();
   const { game, user } = route.params;
   const responses = [
     "You really know how to sketch out the correct answer!",
@@ -58,7 +57,7 @@ const Guess = ({ route, navigation }) => {
     try {
       const { data, error } = await supabase
         .from("games")
-        .select("svg, aspectRatio")
+        .select("svg")
         .eq("id", game.id)
         .limit(1)
         .single();
@@ -66,9 +65,6 @@ const Guess = ({ route, navigation }) => {
       if (error) {
         throw new Error(`Error fetching game ${game.id}: ${error.message}`);
       }
-      console.log("aspectRatio");
-      console.log(data.aspectRatio);
-      setDrawingAspectRatio(data.aspectRatio);
 
       // Use a loop with setTimeout to add each entry to drawingPaths with a 1-second delay
       const svgArray = data.svg || [];
@@ -89,14 +85,13 @@ const Guess = ({ route, navigation }) => {
   async function updateUserStats() {
     try {
       const updateUserData = async (userId) => {
-        console.log(`Fetching user ${userId} data`);
+        
         const userData = await supabase
           .from("profiles")
           .select("rank, coins")
           .eq("id", userId)
           .limit(1)
           .single();
-        console.log(`User ${userId} data:`, userData);
 
         if (userData.error) {
           throw new Error(
@@ -115,9 +110,6 @@ const Guess = ({ route, navigation }) => {
         }
 
         const updatedCoins = userData.data.coins + reward;
-        console.log(
-          `User ${userId} will have a total coins of: ${updatedCoins}`
-        );
 
         // Update user
         const updateUser = await supabase
@@ -190,7 +182,7 @@ const Guess = ({ route, navigation }) => {
     updateUserStats();
     updateGameTurn();
     setIsRewardDialogVisible(true);
-    setLoading(false);
+     setLoading(false);
   };
 
   const handleRequestHelp = async () => {
@@ -198,6 +190,14 @@ const Guess = ({ route, navigation }) => {
     // remove letters
     // remove coins
   }
+
+  const onContinuePlaying = () => {
+    setIsRewardDialogVisible(false);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Home" }],
+    });
+  };
 
   const onRewardDialog = () => {
     setIsRewardDialogVisible(false);
@@ -207,13 +207,6 @@ const Guess = ({ route, navigation }) => {
     });
   };
 
-  const svgStyles = StyleSheet.flatten([
-    styles.svgContainer,
-    {
-      aspectRatio: drawingAspectRatio,
-    },
-  ]);
-
   return (
     <>
       {loading && <Loading />}
@@ -222,6 +215,7 @@ const Guess = ({ route, navigation }) => {
           props=""
           title={responses[Math.floor(Math.random() * responses.length)]}>
           <RewardDialog
+            onContinuePlaying={() => onRewardDialog()}
             onClose={() => onRewardDialog()}
             difficulty={game.difficulty}
           />

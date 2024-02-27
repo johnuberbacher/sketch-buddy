@@ -69,16 +69,21 @@ const ChooseWord = ({ user, selectedGame, onClose }) => {
         alert("You don't have enough coins to refresh the words");
         return;
       }
+
+      const updatedCoins = userCoins - 3;
+
       const { data, error } = await supabase
         .from("profiles")
         .update({
-          coins: userCoins - 3,
+          coins: updatedCoins,
         })
         .eq("id", user);
 
       if (error) {
         throw new Error("Error fetching data");
       }
+      
+      setUserCoins(updatedCoins);
     } catch (error) {
       if (error instanceof Error) {
         alert(error.message);
@@ -88,16 +93,12 @@ const ChooseWord = ({ user, selectedGame, onClose }) => {
 
   async function refreshGameWords() {
     fetchWords();
-    fetchCoins();
     updateCoins();
   }
 
   async function updateGameWord(word: string, difficulty: string) {
     try {
       setLoading(true);
-
-      console.log(selectedGame);
-      console.log("Updating game word:", word, difficulty);
 
       const { data, error } = await supabase
         .from("games")
@@ -109,20 +110,19 @@ const ChooseWord = ({ user, selectedGame, onClose }) => {
         throw new Error("Error updating game word");
       }
 
-      console.log("Game word updated successfully");
+      selectedGame.word = word;
+      setLoading(false);
+      onClose();
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error in updateGameWord:", error.message);
         alert(error.message);
       }
-    } finally {
-      selectedGame.word = word;
-      setLoading(false);
-      onClose();
     }
   }
 
   useEffect(() => {
+    fetchCoins();
     fetchWords();
   }, []);
 
@@ -161,27 +161,31 @@ const ChooseWord = ({ user, selectedGame, onClose }) => {
               />
             </View>
           ))}
-          <View
-            style={{
-              height: 2,
-              width: "100%",
-              backgroundColor: "#000",
-              opacity: 0.05,
-            }}></View>
-          <View
-            style={{
-              width: "100%",
-              flexDirection: "row",
-            }}>
-            <NewButton
-              color="secondary"
-              title="Get new words"
-              reward="3"
-              onPress={() => {
-                refreshGameWords();
-              }}
-            />
-          </View>
+          {userCoins >= 3 && (
+            <>
+              <View
+                style={{
+                  height: 2,
+                  width: "100%",
+                  backgroundColor: "#000",
+                  opacity: 0.05,
+                }}></View>
+              <View
+                style={{
+                  width: "100%",
+                  flexDirection: "row",
+                }}>
+                <NewButton
+                  color="secondary"
+                  title="Get new words"
+                  reward="3"
+                  onPress={() => {
+                    refreshGameWords();
+                  }}
+                />
+              </View>
+            </>
+          )}
         </>
       )}
     </>

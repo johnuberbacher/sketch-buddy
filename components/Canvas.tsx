@@ -19,7 +19,6 @@ import * as MediaLibrary from "expo-media-library";
 const Canvas = ({ onSubmitDraw, word }) => {
   const [paths, setPaths] = useState([]);
   const [currentPath, setCurrentPath] = useState([]);
-  const [aspectRatio, setAspectRatio] = useState(null);
   const [selectedColor, setSelectedColor] = useState("#000000");
   const [selectedStrokeSize, setSelectedStrokeSize] = useState(8);
   const [eraserActive, setEraserActive] = useState(false);
@@ -29,12 +28,7 @@ const Canvas = ({ onSubmitDraw, word }) => {
   const staticword = word;
 
   const onLayoutHandler = (event) => {
-    console.log("I DO RUN!!");
     const { width, height } = event.nativeEvent.layout;
-
-    const newAspectRatio = Math.round((width / height) * 100) / 100;
-
-    setAspectRatio(newAspectRatio);
   };
 
   useLayoutEffect(() => {
@@ -144,8 +138,7 @@ const Canvas = ({ onSubmitDraw, word }) => {
   };
 
   const submitDrawing = () => {
-    console.log("1212 aspect ratio is ", aspectRatio);
-    onSubmitDraw(paths, aspectRatio);
+    onSubmitDraw(paths);
   };
 
   return (

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
-import { NavigationContainer, DefaultTheme  } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useFonts } from "expo-font";
@@ -102,13 +102,17 @@ const App = () => {
     ...DefaultTheme,
     colors: {
       ...DefaultTheme.colors,
-      background: 'transparent'
+      background: "transparent",
     },
   };
   return (
     <NavigationContainer theme={MyTheme} style={styles.container}>
       <SafeAreaView style={styles.safeArea} onLayout={onLayoutRootView}>
-        <StatusBar barStyle="dark-content" backgroundColor={COLORS.secondary} />
+        <StatusBar
+          barStyle="dark-content"
+          animated={true}
+          backgroundColor={COLORS.secondary}
+        />
         <AudioPlayer
           source={require(/* webpackPreload: true */ "./assets/music/Catwalk.wav")}
         />
@@ -122,7 +126,7 @@ const App = () => {
                 initialRouteName="Home"
                 screenOptions={{
                   cardStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: "transparent",
                   },
                   headerShown: false,
                   headerBackVisible: false,
