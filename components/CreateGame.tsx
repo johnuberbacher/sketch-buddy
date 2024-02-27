@@ -55,12 +55,14 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
             user1: currentUserData.id,
             user1username: currentUserData.username,
             user2: opponent.id,
-            user2username: opponent.username,
+            user2username: opponent.username, 
             turn: currentUserData.id,
             action: "draw",
             word: null,
             difficulty: null,
             streak: 0,
+            svg: null,
+            aspectRatio: null,
           },
         ])
         .select()
@@ -116,15 +118,12 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
         <>
           <View
             style={{
+              height: "100%",
               width: "100%",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
               gap: 20,
             }}>
             <View
               style={{
-                maxHeight: 400,
                 width: "100%",
                 flexDirection: "row",
                 gap: 20,
@@ -189,7 +188,7 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
                         alignItems: "flex-start",
                       }}>
                       <NewButton
-                        title="PLAY"
+                        title="Play"
                         size="small"
                         onPress={() => {
                           createNewGame(user);

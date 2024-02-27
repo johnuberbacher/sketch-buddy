@@ -6,6 +6,7 @@ import {
   Text,
   TextInput,
   StyleSheet,
+  ScrollView,
 } from "react-native";
 import NewButton from "../components/NewButton";
 import { useLayoutEffect, useState, useEffect } from "react";
@@ -58,13 +59,22 @@ const Landing = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View
+        style={{
+          flex: 1,
+          flexDirection: "column",
+          alignItems: "center",
+          height: "100%",
+          width: "100%",
+          gap: 20,
+          padding: 20,
+        }}>
       <View
         style={{
           flexDirection: "column",
           alignItems: "center",
           width: "100%",
-          gap: 20,
         }}>
         <ImageBackground
           style={{
@@ -99,24 +109,6 @@ const Landing = () => {
           blurRadius={5}
           resizeMode="cover">
           <View style={styles.overlayInner}>
-            {/*<View
-              style={{
-                width: "100%",
-                flexDirection: "row",
-              }}>
-              <NewButton
-                title="Login with Phone Number"
-                onPress={() => {
-                  navigation.navigate("Home");
-                }}
-              />
-            </View>
-            <View
-              style={{
-                height: 1,
-                width: "100%",
-                backgroundColor: "rgba(255,255,255,0.75)",
-              }}></View>*/}
             <View
               style={{
                 width: "100%",
@@ -218,6 +210,7 @@ const Landing = () => {
           </View>
         </ImageBackground>
       </View>
+      
       <View
         style={{
           width: "100%",
@@ -249,22 +242,19 @@ const Landing = () => {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
-    flex: 1,
-    flexDirection: "column",
     alignItems: "center",
-    justifyContent: "space-between",
-    padding: 40,
-    gap: 20,
+    justifyContent: "center", 
     backgroundColor: COLORS.secondary,
   },
   overlayInner: {
+    maxWidth: 500,
     width: "100%",
     flexDirection: "column",
     alignItems: "center",

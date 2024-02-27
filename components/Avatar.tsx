@@ -23,6 +23,7 @@ const Avatar = ({ level }) => {
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
+        backgroundColor: "transparent", 
       }}>
       {level !== "null" && (
         <View
@@ -68,15 +69,16 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
-    borderRadius: 15,
+    borderRadius: 100,
     elevation: 0,
     aspectRatio: 1,
+    backgroundColor: "transparent", 
   },
   buttonInner: {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 10,
+    borderRadius: 100,
     aspectRatio: 1,
     width: "100%",
     height: "auto",

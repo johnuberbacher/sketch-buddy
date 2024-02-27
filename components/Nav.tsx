@@ -8,22 +8,11 @@ import {
 } from "react-native";
 import Avatar from "../components/Avatar";
 import FlatButton from "../components/FlatButton";
-import Button from "./Button";
-import Settings from "./Settings";
 import COLORS from "../constants/colors";
 
-const Nav = () => {
-  const [isSettingsVisible, setIsSettingsVisible] = useState(false);
-
-  const toggleSettingsVisibility = () => {
-    setIsSettingsVisible(!isSettingsVisible);
-  };
-
+const Nav = ({ onToggleSettings }) => {
   return (
     <>
-      {isSettingsVisible && (
-        <Settings onClose={() => setIsSettingsVisible(false)} />
-      )}
       <View
         style={{
           width: "100%",
@@ -32,14 +21,12 @@ const Nav = () => {
           alignItems: "center",
           gap: 20,
           paddingHorizontal: 20,
-          paddingTop: 20,
-          paddingBottom: 40,
-          backgroundColor: COLORS.secondary,
+          paddingVertical: 15,
         }}>
         <View style={{ borderWidth: 0 }}>
-          <FlatButton onPress={toggleSettingsVisibility} />
+          <FlatButton onPress={() => onToggleSettings()} />
         </View>
-        <View style={{ width: 60, borderWidth: 0 }}>
+        <View style={{ width: 40, borderWidth: 0 }}>
           <Avatar level="null" />
         </View>
       </View>

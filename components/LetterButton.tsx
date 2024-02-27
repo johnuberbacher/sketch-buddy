@@ -42,7 +42,7 @@ const LetterButton = (props) => {
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}>
       <Text selectable={false} style={{ ...styles.buttonText }}>
-        {props.title}
+        {!props.selected ? props.title : ''}
       </Text>
     </TouchableHighlight>
   );
@@ -61,7 +61,9 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     elevation: 2,
   },
-  buttonInnerPressed: {},
+  buttonInnerPressed: {
+    backgroundColor: COLORS.primary,
+  },
   buttonInnerSelected: {
     flexDirection: "column",
     justifyContent: "center",
@@ -76,10 +78,10 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontSize: 30,
-    fontFamily: "Kanit-Bold",
+    fontSize: 24,
+    fontFamily: "Kanit-SemiBold",
     textShadowColor: "rgba(0, 0, 0, 0.25)",
-    textShadowOffset: { width: 0, height: 3 },
+    textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
     textTransform: "capitalize",
   },

@@ -6,10 +6,11 @@ import {
   View,
   StyleSheet,
   LogBox,
+  ImageBackground,
 } from "react-native";
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme  } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useFonts } from "expo-font";
@@ -42,7 +43,7 @@ const App = () => {
   });
 
   if (Platform.OS === "android") {
-    StatusBar.setBackgroundColor(COLORS.secondary);
+    StatusBar.setBackgroundColor("transparent");
   }
 
   if (Platform.OS === "ios") {
@@ -97,17 +98,33 @@ const App = () => {
     return null;
   }
 
+  const MyTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: 'transparent'
+    },
+  };
   return (
-    <NavigationContainer style={styles.container}>
+    <NavigationContainer theme={MyTheme} style={styles.container}>
       <SafeAreaView style={styles.safeArea} onLayout={onLayoutRootView}>
+        <StatusBar barStyle="dark-content" backgroundColor={COLORS.secondary} />
         <AudioPlayer
           source={require(/* webpackPreload: true */ "./assets/music/Catwalk.wav")}
         />
         <View style={styles.mainContainer}>
-          <View style={styles.innerContainer}>
-            { session && session.user ? <Stack.Navigator
+          <ImageBackground
+            source={require("./assets/bg.png")}
+            resizeMode={"cover"}
+            style={styles.innerContainer}>
+            {session && session.user ? (
+              <Stack.Navigator
                 initialRouteName="Home"
                 screenOptions={{
+                  cardStyle: {
+                    backgroundColor: 'transparent',
+                  },
+                  headerShown: false,
                   headerBackVisible: false,
                   animation: "slide_from_right",
                 }}>
@@ -118,11 +135,6 @@ const App = () => {
                     key: session.user.id,
                     session: session,
                   }}
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="Leaderboard"
-                  component={Leaderboard}
                   options={{ headerShown: false }}
                 />
                 <Stack.Screen
@@ -140,8 +152,16 @@ const App = () => {
                   component={Landing}
                   options={{ headerShown: false }}
                 />
-              </Stack.Navigator> : <Landing /> }
-          </View>
+                <Stack.Screen
+                  name="Leaderboard"
+                  component={Leaderboard}
+                  options={{ headerShown: false }}
+                />
+              </Stack.Navigator>
+            ) : (
+              <Landing />
+            )}
+          </ImageBackground>
         </View>
       </SafeAreaView>
     </NavigationContainer>
@@ -156,7 +176,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.secondary,
   },
   safeArea: {
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    paddingTop: 0,
     flex: 1,
     backgroundColor: COLORS.secondary,
   },
@@ -165,8 +185,6 @@ const styles = StyleSheet.create({
     flex: 1,
     position: "relative",
     width: "100%",
-    maxWidth: 600,
-    marginHorizontal: "auto",
   },
   innerContainer: {
     height: "auto",

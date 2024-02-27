@@ -5,27 +5,23 @@ import COLORS from "../constants/colors";
 import { supabase } from "../lib/supabase";
 import { useNavigation } from "@react-navigation/native";
 
-const ChooseWord = ({ selectedGame, onClose }) => {
+const ChooseWord = ({ user, selectedGame, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [remoteData, setRemoteData] = useState([]);
+  const [userCoins, setUserCoins] = useState(0);
   const navigation = useNavigation();
 
   async function fetchWords() {
     try {
       setLoading(true);
-      
+
       const { data, error } = await supabase
         .from("words")
         .select("word, difficulty");
 
-      console.log(data);
-
       if (error) {
-        console.error("Error fetching data:", error.message);
         throw new Error("Error fetching data");
       }
-
-      console.log("ChooseWord: Data fetched successfully");
 
       const getRandomEntry = (arr) =>
         arr[Math.floor(Math.random() * arr.length)];
@@ -36,25 +32,72 @@ const ChooseWord = ({ selectedGame, onClose }) => {
         getRandomEntry(data.filter((entry) => entry.difficulty === "hard")),
       ];
 
-
       setRemoteData(randomWords);
     } catch (error) {
       if (error instanceof Error) {
-        console.error("Error in fetchWords:", error.message);
         alert(error.message);
       }
     } finally {
       setLoading(false);
-      console.log("ChooseWord: Loading state set to false.");
     }
+  }
+
+  async function fetchCoins() {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("coins")
+        .eq("id", user)
+        .limit(1)
+        .single();
+
+      setUserCoins(data.coins);
+
+      if (error) {
+        throw new Error("Error fetching data");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message);
+      }
+    }
+  }
+
+  async function updateCoins() {
+    try {
+      if (userCoins < 3) {
+        alert("You don't have enough coins to refresh the words");
+        return;
+      }
+      const { data, error } = await supabase
+        .from("profiles")
+        .update({
+          coins: userCoins - 3,
+        })
+        .eq("id", user);
+
+      if (error) {
+        throw new Error("Error fetching data");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message);
+      }
+    }
+  }
+
+  async function refreshGameWords() {
+    fetchWords();
+    fetchCoins();
+    updateCoins();
   }
 
   async function updateGameWord(word: string, difficulty: string) {
     try {
       setLoading(true);
 
-      console.log(selectedGame)
-      console.log("Updating game word:", word, difficulty)
+      console.log(selectedGame);
+      console.log("Updating game word:", word, difficulty);
 
       const { data, error } = await supabase
         .from("games")
@@ -118,6 +161,27 @@ const ChooseWord = ({ selectedGame, onClose }) => {
               />
             </View>
           ))}
+          <View
+            style={{
+              height: 2,
+              width: "100%",
+              backgroundColor: "#000",
+              opacity: 0.05,
+            }}></View>
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "row",
+            }}>
+            <NewButton
+              color="secondary"
+              title="Get new words"
+              reward="3"
+              onPress={() => {
+                refreshGameWords();
+              }}
+            />
+          </View>
         </>
       )}
     </>

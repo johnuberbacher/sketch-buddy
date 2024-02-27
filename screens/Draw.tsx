@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import Canvas from "../components/Canvas";
 import { useLayoutEffect } from "react";
@@ -6,6 +6,7 @@ import ConfirmDialog from "../components/ConfirmDialog";
 import Modal from "../components/Modal";
 import Loading from "../components/Loading";
 import { supabase } from "../lib/supabase";
+import COLORS from "../constants/colors";
 
 const Draw = ({ route, navigation }) => {
   const [isConfirmDialogVisible, setIsConfirmDialogVisible] = useState(false);
@@ -25,31 +26,35 @@ const Draw = ({ route, navigation }) => {
     });
   }, [navigation]);
 
-  async function updateGameTurn() {
+  const handleSubmitDrawing = async (paths, aspectRatio) => {
     try {
       setLoading(true);
 
       const turn = game.user1 === user ? game.user2 : game.user1;
 
+      console.log("the new aspect ratio is", aspectRatio);
+
       const { data, error } = await supabase
         .from("games")
-        .update({ word: game.word, turn: turn, action: "guess" })
+        .update({
+          word: game.word,
+          turn: turn,
+          action: "guess",
+          svg: paths,
+          aspectRatio: aspectRatio,
+        })
         .eq("id", game.id);
 
       if (error) {
         throw new Error("Error updating game turn");
       }
       setLoading(false);
+      setIsConfirmDialogVisible(true);
     } catch (error) {
       if (error instanceof Error) {
         alert(error.message);
       }
     }
-  }
-
-  const handleSubmitDrawing = async () => {
-    updateGameTurn();
-    setIsConfirmDialogVisible(true);
   };
 
   const onConfirmDialog = () => {
@@ -68,15 +73,40 @@ const Draw = ({ route, navigation }) => {
           <ConfirmDialog onClose={() => onConfirmDialog()} />
         </Modal>
       )}
-      <View
-        style={{
-          flex: 1,
-          flexDirection: "column",
-          justifyContent: "flex-start",
+      <ScrollView
+        style={{ backgroundColor: "transparent" }}
+        contentContainerStyle={{
+          width: "100%",
+          justifyContent: "center",
           alignItems: "center",
+          minHeight: "100%",
         }}>
-        <Canvas onSubmitDraw={handleSubmitDrawing} word={game.word} />
-      </View>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "column",
+            height: "100%",
+            width: "100%",
+            maxWidth: 500,
+            marginHorizontal: "auto",
+          }}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "space-between",
+              width: "100%",
+              height: "100%",
+              gap: 20,
+            }}>
+            <Canvas
+              onSubmitDraw={(paths, aspectRatio) =>
+                handleSubmitDrawing(paths, aspectRatio)
+              }
+              word={game.word}
+            />
+          </View>
+        </View>
+      </ScrollView>
     </>
   );
 };

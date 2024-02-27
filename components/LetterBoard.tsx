@@ -17,13 +17,13 @@ const LetterBoard = ({ word, difficulty, onGuessCorrect }) => {
   const [answerLetters, setAnswerLetters] = useState([]);
   const [isSelected, setIsSelected] = useState(Array(12).fill(false));
   const [victoryStyles, setVictoryStyles] = useState(null);
+  const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
-  let difficultyLength = 12;
-  const emptyButtons = Array(word.length).fill(null);
+  let difficultyLength = 14;
+  const emptyButtons = Array(6).fill(null);
 
   useEffect(() => {
     const staticWordFrequencyMap = new Map([...word].map((char) => [char, 1]));
-    const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
     // Ensure that staticWord letters are included in optionLetters
     const staticWordLetters = generateCharactersFromFrequency(
@@ -33,8 +33,8 @@ const LetterBoard = ({ word, difficulty, onGuessCorrect }) => {
 
     const usedChars = new Set([...staticWordLetters]);
     if (difficulty === "medium" || difficulty === "hard") {
-      console.log(difficulty);
-      difficultyLength = 12;
+      // console.log(difficulty);
+      // difficultyLength = 14;
     }
 
     const randomLetters = Array.from(
@@ -215,7 +215,8 @@ const LetterBoard = ({ word, difficulty, onGuessCorrect }) => {
       </View>
       <View
         style={{
-          gap: 10,
+          gap: 5,
+          width: "100%",
           alignItems: "center",
           justifyContent: "space-between",
           flexDirection: "column",
@@ -245,16 +246,6 @@ const LetterBoard = ({ word, difficulty, onGuessCorrect }) => {
             ))}
         </View>
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 2,
-          paddingLeft: 10,
-          paddingRight: 10,
-          marginTop: 20,
-        }}></View>
     </>
   );
 };
@@ -266,7 +257,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 10,
-    paddingBottom: 20,
   },
   victoryStyles: {
     backgroundColor: COLORS.red,
@@ -284,14 +274,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     flexWrap: "nowrap",
     alignItems: "center",
-    gap: 10,
+    gap: 5,
   },
   secondRow: {
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 10,
+    gap: 5,
   },
   wrapperVictoryStyles: {
     backgroundColor: "#ade053",

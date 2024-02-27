@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Animated,
   ImageBackground,
+  ScrollView,
 } from "react-native";
 import COLORS from "../constants/colors";
 import { useNavigation } from "@react-navigation/native";
@@ -33,50 +34,54 @@ const Modal = ({ props, title, children }) => {
 
   return (
     <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-      <View style={styles.overlay}>
-        <ImageBackground
-          style={{
-            width: "100%",
-            height: "100%",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          blurRadius={50}
-          resizeMode="cover">
-          <View style={styles.overlayInner}>
-            <Text selectable={false} style={styles.overlayTitle}>
-              {title}
-            </Text>
+      <ImageBackground
+        style={{
+          flex: 1,
+          width: "100%",
+          height: "auto",
+          maxWidth: 500,
+          padding: 20,
+          marginHorizontal: "auto",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+        blurRadius={50}
+        resizeMode="cover">
+        <View style={styles.overlayInner}>
+          <Text selectable={false} style={styles.overlayTitle}>
+            {title}
+          </Text>
+          <View
+            style={{
+              width: "100%",
+              height: 2,
+              backgroundColor: "#000",
+              opacity: 0.05,
+            }}></View>
+          <View
+            style={{
+              flexDirection: "row",
+              width: "100%",
+              height: "auto",
+            }}>
             <View
               style={{
-                width: "100%",
-                height: 2,
-                backgroundColor: "#000",
-                opacity: 0.05,
-              }}></View>
-            <View
-              style={{
-                flexDirection: "row",
                 width: "100%",
                 height: "auto",
               }}>
-              <View
-                style={{
-                  width: "100%",
+              <ScrollView
+                contentContainerStyle={{
                   height: "auto",
-                  flex: 1,
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  justifyContent: "strech",
+                  padding: 0,
                   gap: 20,
                 }}>
                 <>{children}</>
-              </View>
+              </ScrollView>
             </View>
           </View>
-        </ImageBackground>
-      </View>
+        </View>
+      </ImageBackground>
     </Animated.View>
   );
 };
@@ -90,7 +95,6 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: "rgba(0,0,0,0.25)",
     zIndex: 10,
-    padding: 20,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
@@ -98,9 +102,6 @@ const styles = StyleSheet.create({
   overlayInner: {
     width: "100%",
     height: "auto",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
     padding: 20,
     gap: 20,
     color: "white",

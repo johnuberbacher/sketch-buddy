@@ -1,114 +1,62 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  ImageBackground,
-} from "react-native";
-import NewButton from "../components/NewButton";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
+import NewButton from "./NewButton";
 import COLORS from "../constants/colors";
 import { supabase } from "../lib/supabase";
-import { Session } from "@supabase/supabase-js";
+import { useNavigation } from "@react-navigation/native";
 
-const Settings = ({ session }: { session: Session }) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState("");
-  const [website, setWebsite] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
-
-  useEffect(() => {
-    //   if (session) getProfile();
-  }, [session]);
-
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 150,
-      useNativeDriver: true,
-    }).start();
-  }, [fadeAnim]);
-
-  const onClose = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 150,
-      useNativeDriver: true,
-    }).start(() => {
-      props.onClose();
-    });
-  };
+const Settings = ({ onClose }) => {
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
 
   return (
-    <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-      <View style={styles.overlay}>
-        <ImageBackground
+    <>
+      {loading ? (
+        <View
           style={{
-            width: "100%",
+            paddingVertical: 40,
             height: "100%",
+            width: "100%",
+            flex: 1,
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-          }}
-          blurRadius={50}
-          resizeMode="cover">
-          <View style={styles.overlayInner}>
-            <Text selectable={false} style={styles.overlayTitle}>
-              Settings
-            </Text>
-            <View
-              style={{
-                width: "100%",
-                height: 2,
-                backgroundColor: "#000",
-                opacity: 0.05,
-              }}></View>
-            <View
-              style={{
-                flexDirection: "row",
-                width: "100%",
-              }}>
-              <View
-                style={{
-                  width: "100%",
-                  flex: 1,
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  justifyContent: "strech",
-                }}>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "row",
-                  }}>
-                  <NewButton title="Mute" />
-                </View>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "row",
-                    marginTop: 20,
-                  }}>
-                  <NewButton
-                    title="Logout"
-                    onPress={() => supabase.auth.signOut()}
-                  />
-                </View>
-                <View
-                  style={{
-                    width: "100%",
-                    flexDirection: "row",
-                    marginTop: 20,
-                  }}>
-                  <NewButton title="Close" onPress={() => onClose()} />
-                </View>
-              </View>
-            </View>
+          }}>
+          <ActivityIndicator size="large" color={COLORS.secondary} />
+        </View>
+      ) : (
+        <>
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "row",
+            }}>
+            <NewButton title="Leaderboards" onPress={() => null} />
           </View>
-        </ImageBackground>
-      </View>
-    </Animated.View>
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "row",
+            }}>
+            <NewButton
+              title="Sign Out"
+              onPress={() => supabase.auth.signOut()}
+            />
+          </View>
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "row",
+            }}>
+            <NewButton
+              color="primary"
+              title="Close"
+              onPress={() => onClose()}
+            />
+          </View>
+        </>
+      )}
+    </>
   );
 };
 

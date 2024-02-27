@@ -7,8 +7,10 @@ import {
   ScrollView,
   Pressable,
   Image,
+  StyleSheet,
+  Animated,
 } from "react-native";
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import LetterBoard from "../components/LetterBoard";
 import FlatButton from "../components/FlatButton";
@@ -19,10 +21,13 @@ import Modal from "../components/Modal";
 import RewardDialog from "../components/RewardDialog";
 import Loading from "../components/Loading";
 import { supabase } from "../lib/supabase";
+import { Svg, Path } from "react-native-svg";
 
 const Guess = ({ route, navigation }) => {
   const [isRewardDialogVisible, setIsRewardDialogVisible] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [drawingPaths, setDrawingPaths] = useState([]);
+  const [drawingAspectRatio, setDrawingAspectRatio] = useState();
   const { game, user } = route.params;
   const responses = [
     "You really know how to sketch out the correct answer!",
@@ -39,7 +44,7 @@ const Guess = ({ route, navigation }) => {
 
   useEffect(() => {
     if (game.word) {
-      setLoading(false);
+      fetchDrawing();
     }
   }, []);
 
@@ -48,6 +53,38 @@ const Guess = ({ route, navigation }) => {
       headerShown: false,
     });
   }, [navigation]);
+
+  async function fetchDrawing() {
+    try {
+      const { data, error } = await supabase
+        .from("games")
+        .select("svg, aspectRatio")
+        .eq("id", game.id)
+        .limit(1)
+        .single();
+
+      if (error) {
+        throw new Error(`Error fetching game ${game.id}: ${error.message}`);
+      }
+      console.log("aspectRatio");
+      console.log(data.aspectRatio);
+      setDrawingAspectRatio(data.aspectRatio);
+
+      // Use a loop with setTimeout to add each entry to drawingPaths with a 1-second delay
+      const svgArray = data.svg || [];
+      for (let i = 0; i < svgArray.length; i++) {
+        setTimeout(() => {
+          setDrawingPaths((prevPaths) => [...prevPaths, svgArray[i]]);
+        }, i * 1000); // 1000 milliseconds = 1 second
+      }
+
+      setLoading(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message);
+      }
+    }
+  }
 
   async function updateUserStats() {
     try {
@@ -109,8 +146,8 @@ const Guess = ({ route, navigation }) => {
       }
     }
   }
+
   async function updateGameTurn() {
-    console.log("yoooooooooo");
     try {
       const gameData = await supabase
         .from("games")
@@ -132,7 +169,7 @@ const Guess = ({ route, navigation }) => {
         .from("games")
         .update({
           word: null,
-          turn: turn,
+          turn: user,
           action: "draw",
           streak: streak,
         })
@@ -156,6 +193,12 @@ const Guess = ({ route, navigation }) => {
     setLoading(false);
   };
 
+  const handleRequestHelp = async () => {
+    // check if enough coins
+    // remove letters
+    // remove coins
+  }
+
   const onRewardDialog = () => {
     setIsRewardDialogVisible(false);
     navigation.reset({
@@ -163,6 +206,13 @@ const Guess = ({ route, navigation }) => {
       routes: [{ name: "Home" }],
     });
   };
+
+  const svgStyles = StyleSheet.flatten([
+    styles.svgContainer,
+    {
+      aspectRatio: drawingAspectRatio,
+    },
+  ]);
 
   return (
     <>
@@ -177,53 +227,159 @@ const Guess = ({ route, navigation }) => {
           />
         </Modal>
       )}
-      <View
-        style={{
-          flex: 1,
+      <ScrollView
+        style={{ backgroundColor: "transparent" }}
+        contentContainerStyle={{
           width: "100%",
-          height: "100%",
-          backgroundColor: COLORS.secondary,
-          gap: 20,
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100%",
         }}>
         <View
           style={{
+            flex: 1,
+            flexDirection: "column",
+            height: "100%",
             width: "100%",
-            height: "auto",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingTop: 20,
-            gap: 20,
+            maxWidth: 500,
+            marginHorizontal: "auto",
           }}>
           <View
             style={{
-              width: "100%",
               flex: 1,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-start",
+              justifyContent: "space-between",
+              width: "100%",
+              height: "100%",
               gap: 20,
             }}>
             <View
               style={{
-                paddingLeft: 20,
-                backgroundColor: COLORS.secondary,
-                width: 100,
+                width: "100%",
+                height: "auto",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingTop: 20,
+                gap: 20,
               }}>
-              <Avatar level="null" />
+              <View
+                style={{
+                  width: "100%",
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: 20,
+                }}>
+                <View
+                  style={{
+                    marginLeft: 20,
+                    backgroundColor: COLORS.secondary,
+                    width: 60,
+                    height: 60,
+                  }}>
+                  <Avatar level="null" />
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    height: 60,
+                    paddingLeft: 30,
+                    paddingRight: 20,
+                    paddingVertical: 10,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    borderTopStartRadius: 40,
+                    borderBottomStartRadius: 40,
+                    backgroundColor: COLORS.primary,
+                    shadowColor: "rgba(0, 0, 0, 0.5)",
+                    shadowOffset: {
+                      width: 0,
+                      height: 0,
+                    },
+                    shadowOpacity: 0.34,
+                    shadowRadius: 6.27,
+                    elevation: 10,
+                  }}>
+                  <View
+                    style={{
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      justifyContent: "flex-start",
+                      gap: 0,
+                    }}>
+                    <Text
+                      selectable={false}
+                      style={{
+                        textTransform: "uppercase",
+                        fontSize: 20,
+                        fontFamily: "Kanit-SemiBold",
+                        color: "white",
+                        lineHeight: 36,
+                        textShadowColor: "rgba(0, 0, 0, 0.25)",
+                        textShadowOffset: { width: 0, height: 2 },
+                        textShadowRadius: 4,
+                      }}>
+                      Guess username's word!
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
+
             <View
               style={{
-                flex: 1,
-                paddingLeft: 30,
-                paddingRight: 20,
-                paddingVertical: 10,
-                flexDirection: "row",
-                justifyContent: "space-between",
+                width: "100%",
                 alignItems: "center",
+                justifyContent: "center",
+                paddingHorizontal: 20,
+              }}>
+              <View
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  backgroundColor: "#fff",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 20,
+                  shadowColor: "rgba(0, 0, 0, 0.5)",
+                  shadowOffset: {
+                    width: 0,
+                    height: 0,
+                  },
+                  shadowOpacity: 0.34,
+                  shadowRadius: 6.27,
+                  elevation: 10,
+                  aspectRatio: 1,
+                  position: "relative",
+                }}>
+                <Svg style={svgStyles}>
+                  {drawingPaths?.map((pathObject, pathIndex) => (
+                    <Path
+                      key={pathObject + pathIndex}
+                      d={pathObject.path.join(" ")}
+                      stroke={pathObject.color}
+                      strokeWidth={pathObject.strokeSize}
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                  ))}
+                </Svg>
+              </View>
+            </View>
+
+            <View
+              style={{
+                width: "100%",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                backgroundColor: "white",
                 borderTopStartRadius: 40,
-                borderBottomStartRadius: 40,
-                backgroundColor: COLORS.primary,
+                borderTopEndRadius: 40,
+                padding: 20,
+                gap: 15,
                 shadowColor: "rgba(0, 0, 0, 0.5)",
                 shadowOffset: {
                   width: 0,
@@ -233,140 +389,52 @@ const Guess = ({ route, navigation }) => {
                 shadowRadius: 6.27,
                 elevation: 10,
               }}>
+              <LetterBoard
+                word={game.word}
+                difficulty={game.difficulty}
+                onGuessCorrect={handleGuessCorrect}
+              />
               <View
                 style={{
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  justifyContent: "flex-start",
-                  gap: 0,
+                  width: "100%",
+                  flexDirection: "row",
+                  gap: 10,
                 }}>
-                <Text
-                  selectable={false}
+                <NewButton
+                  color="primary"
+                  title="Give up"
+                  onPress={() => {
+                    //
+                  }}
+                />
+                <View
                   style={{
-                    fontSize: 14,
-                    fontFamily: "Kanit-Regular",
-                    color: "white",
-                    opacity: 0.75,
-                    lineHeight: 18,
-                    textShadowColor: "rgba(0, 0, 0, 0.25)",
-                    textShadowOffset: { width: 0, height: 2 },
-                    textShadowRadius: 4,
+                    width: "65%",
+                    flexDirection: "row",
                   }}>
-                  You are guessing
-                </Text>
-                <Text
-                  selectable={false}
-                  style={{
-                    textTransform: "uppercase",
-                    fontSize: 30,
-                    fontFamily: "Kanit-SemiBold",
-                    color: "white",
-                    lineHeight: 36,
-                    textShadowColor: "rgba(0, 0, 0, 0.25)",
-                    textShadowOffset: { width: 0, height: 2 },
-                    textShadowRadius: 4,
-                  }}>
-                  {game.word}
-                </Text>
-                <Text
-                  selectable={false}
-                  style={{
-                    fontSize: 14,
-                    fontFamily: "Kanit-Regular",
-                    color: "white",
-                    opacity: 0.75,
-                    lineHeight: 14,
-                    textShadowColor: "rgba(0, 0, 0, 0.25)",
-                    textShadowOffset: { width: 0, height: 2 },
-                    textShadowRadius: 4,
-                  }}>
-                  drawing!
-                </Text>
+                  <NewButton
+                    title="I Need Help"
+                    reward="2"
+                    onPress={() => handleRequestHelp()}
+                  />
+                </View>
               </View>
-              <FlatButton />
             </View>
           </View>
         </View>
-        <View
-          style={{
-            width: "100%",
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "flex-start",
-            paddingHorizontal: 20,
-          }}>
-          <View
-            style={{
-              width: "100%",
-              height: "100%",
-              backgroundColor: "#fff",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 20,
-              shadowColor: "rgba(0, 0, 0, 0.5)",
-              shadowOffset: {
-                width: 0,
-                height: 0,
-              },
-              shadowOpacity: 0.34,
-              shadowRadius: 6.27,
-              elevation: 10,
-            }}></View>
-        </View>
-        <View
-          style={{
-            width: "100%",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            backgroundColor: "white",
-            borderTopStartRadius: 40,
-            borderTopEndRadius: 40,
-            padding: 20,
-            shadowColor: "rgba(0, 0, 0, 0.5)",
-            shadowOffset: {
-              width: 0,
-              height: 0,
-            },
-            shadowOpacity: 0.34,
-            shadowRadius: 6.27,
-            elevation: 10,
-          }}>
-          <LetterBoard
-            word={game.word}
-            difficulty={game.difficulty}
-            onGuessCorrect={handleGuessCorrect}
-          />
-          <View
-            style={{
-              width: "100%",
-              flexDirection: "row",
-              gap: 10,
-            }}>
-            <NewButton
-              color="primary"
-              title="Give up"
-              onPress={() => {
-                //
-              }}
-            />
-            <View
-              style={{
-                width: "65%",
-                flexDirection: "row",
-              }}>
-              <NewButton
-                title="Need Help"
-                reward="2"
-                onPress={() => {
-                  //
-                }}
-              />
-            </View>
-          </View>
-        </View>
-      </View>
+      </ScrollView>
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  svgContainer: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+});
 
 export default Guess;

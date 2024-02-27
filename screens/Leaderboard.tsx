@@ -1,39 +1,72 @@
 import {
-  SafeAreaView,
-  Platform,
-  StatusBar,
+  ScrollView,
   View,
   Text,
-  Pressable,
   ActivityIndicator,
-  Image,
   StyleSheet,
-  FlatList,
   ImageBackground,
+  Alert,
+  RefreshControl,
 } from "react-native";
 import { supabase } from "../lib/supabase";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import Nav from "../components/Nav";
-import Canvas from "../components/Canvas";
-import LetterBoard from "../components/LetterBoard";
 import NewButton from "../components/NewButton";
-import Button from "../components/Button";
-import IconButton from "../components/IconButton";
-import FlatButton from "../components/FlatButton";
 import COLORS from "../constants/colors";
 import Avatar from "../components/Avatar";
 import { useNavigation } from "@react-navigation/native";
 import { Session } from "@supabase/supabase-js";
+import ChooseWord from "../components/ChooseWord";
+import Modal from "../components/Modal";
+import CreateGame from "../components/CreateGame";
+import Settings from "../components/Settings";
 
-export default function Leaderboard() {
+const Leaderboard = ({ route }) => {
   const [loading, setLoading] = useState(true);
-  const [remoteData, setRemoteData] = useState([]);
-  const [username, setUsername] = useState("juberbacher");
-  const [avatarUrl, setAvatarUrl] = useState("");
+  const [isSettingsVisibleModal, setIsSettingsVisibleModal] = useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
+  const [usersData, setUsersData] = useState([]);
+  const [topUsersData, setTopUsersData] = useState([]);
   const navigation = useNavigation();
 
-  // fetch games where user1 or user2 === username
-  //
+  async function fetchData() {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, username, rank");
+
+      if (error) {
+        throw new Error(`Error fetching users data: ${error.message}`);
+      }
+
+      // Sort data by Rank
+      const sortedData = data.sort((a, b) => b.rank - a.rank);
+
+      // const topUsers = sortedData;
+      const topUsers = sortedData.slice(0, 3);
+
+      // Swap the first two users
+      [topUsers[0], topUsers[1]] = [topUsers[1], topUsers[0]];
+
+      setTopUsersData(topUsers);
+
+      // Omit top 3 users from usersData
+      const remainingUsers = sortedData;
+      setUsersData(remainingUsers);
+    } catch (error) {
+      console.error("Error fetching users data:", error.message);
+      alert(error.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchData();
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -42,67 +75,206 @@ export default function Leaderboard() {
   }, [navigation]);
 
   useEffect(() => {
-    //  if (session) getProfile();
-    getProfile();
+    setLoading(true);
+    fetchData();
   }, []);
-
-  async function getProfile() {
-    try {
-      setLoading(true);
-      console.log("Fetching data from 'games' table...");
-
-      const { data, error, status } = await supabase.from("games").select("*");
-
-      if (error && status !== 406) {
-        console.error("Error fetching data:", error);
-        throw error;
-      }
-
-      if (data) {
-        console.log("Data fetched successfully:", data);
-        setRemoteData(data);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error in getProfile:", error.message);
-        alert(error.message);
-      }
-    } finally {
-      setLoading(false);
-      console.log("Loading state set to false.");
-    }
-  }
 
   return (
     <>
-      <Nav />
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: COLORS.secondary,
-          width: "100%",
-          gap: 20,
-          flexDirection: "column",
-        }}>
+      {loading ? (
         <View
           style={{
-            paddingHorizontal: 20,
+            flex: 1,
+            backgroundColor: "transparent",
+            width: "100%",
+            height: "100%",
+            gap: 20,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
           }}>
-          <Text
-            style={{
-              fontSize: 34,
-              fontFamily: "Kanit-Bold",
-              color: COLORS.text,
-            }}>
-            Leaderboard
-          </Text>
+          <ActivityIndicator
+            size="large"
+            color="white"
+            style={{ transform: [{ scale: 2 }] }}
+          />
         </View>
-        <View style={styles.menu}>
-        </View>
-      </View>
+      ) : (
+        <>
+          <Nav onToggleSettings={() => setIsSettingsVisibleModal(true)} />
+          {isSettingsVisibleModal && (
+            <Modal props="" title="Settings">
+              <Settings onClose={() => setIsSettingsVisibleModal(false)} />
+            </Modal>
+          )}
+          <ScrollView
+            style={{ backgroundColor: "transparent" }}
+            contentContainerStyle={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "100%",
+            }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }>
+            <View
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+                height: "100%",
+                maxWidth: 500,
+                marginHorizontal: "auto",
+                gap: 20,
+                paddingTop: 50,
+              }}>
+              <View
+                style={{
+                  paddingHorizontal: 20,
+                  position: "relative",
+                }}>
+                <Text
+                  style={{
+                    fontSize: 34,
+                    fontFamily: "Kanit-Bold",
+                    color: COLORS.text,
+                  }}>
+                  Leaderboards
+                </Text>
+              </View>
+              <View style={styles.menu}>
+                <View
+                  style={{
+                    width: "100%",
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                  }}>
+                  {topUsersData.map((user, index) => (
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                      }}>
+                      <View
+                        style={{
+                          width: index === 1 ? 100 : 80,
+                          overflow: "hidden",
+                        }}>
+                        <Avatar level="null" />
+                      </View>
+                      <View
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginTop: -15,
+                          width: 30,
+                          height: 30,
+                          borderWidth: 4,
+                          borderColor: "white",
+                          aspectRatio: 1,
+                          backgroundColor:
+                            index === 1
+                              ? COLORS.secondary
+                              : index === 0
+                              ? COLORS.primary
+                              : COLORS.primary,
+                          borderRadius: 300,
+                        }}>
+                        <Text
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            height: "100%",
+                            width: "100%",
+                            fontSize: 13,
+                            fontFamily: "Kanit-Bold",
+                            textAlign: "center",
+                            color: "white",
+                          }}>
+                          {index === 1 ? "1" : index === 0 ? "2" : "3"}
+                        </Text>
+                      </View>
+                      <Text selectable={false} style={styles.usernameTitle}>
+                        {user.username}
+                      </Text>
+                      <Text selectable={false} style={styles.leaderboardLevel}>
+                        Level {user.rank}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+                {usersData.map((user) => (
+                  <View key={user.id} style={styles.menuInner}>
+                    <View
+                      style={{
+                        width: "100%",
+                        flexDirection: "row",
+                        justifyContent: "flex-start",
+                        gap: 10,
+                        flex: 1,
+                      }}>
+                      <View
+                        style={{
+                          width: 60,
+                        }}>
+                        <Avatar level={user.rank} />
+                      </View>
+                      <View
+                        style={{
+                          width: "100%",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                          alignItems: "flex-start",
+                          gap: 2,
+                        }}>
+                        <View
+                          style={{
+                            width: "100%",
+                            flexDirection: "row",
+                            justifyContent: "flex-start",
+                            alignItems: "center",
+                            gap: 10,
+                          }}>
+                          <Text selectable={false} style={styles.usernameTitle}>
+                            {user.username}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                    <View
+                      style={{
+                        height: 40,
+                        width: "auto",
+                        flexDirection: "column",
+                      }}>
+                      <NewButton
+                        title="Play"
+                        size="small"
+                        onPress={() => {
+                          createNewGame(user);
+                        }}
+                        color="green"
+                      />
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          </ScrollView>
+        </>
+      )}
     </>
   );
-}
+};
 
 const styles = StyleSheet.create({
   menu: {
@@ -114,28 +286,40 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderTopStartRadius: 40,
     borderTopEndRadius: 40,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 5,
     padding: 20,
-    marginTop: 0,
     gap: 20,
+    shadowColor: "rgba(0, 0, 0, 0.5)",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
+    elevation: 10,
   },
   menuInner: {
     width: "100%",
-    paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
-    paddingVertical: 20,
+    justifyContent: "center",
+    paddingVertical: 15,
+    paddingHorizontal: 15,
     backgroundColor: "#feeede",
     borderRadius: 15,
     gap: 20,
   },
   usernameTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontFamily: "Kanit-Medium",
+    marginLeft: 10,
+    color: COLORS.text,
+  },
+  leaderboardLevel: {
+    fontSize: 14,
+    fontFamily: "Kanit-Regular",
+    marginLeft: 10,
+    color: COLORS.text,
+    opacity: 0.5,
   },
   textYourMove: {
     color: "white",
@@ -156,3 +340,5 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
   },
 });
+
+export default Leaderboard;

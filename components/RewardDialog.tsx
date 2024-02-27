@@ -12,7 +12,7 @@ import COLORS from "../constants/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 
-const RewardDialog = ({ difficulty, onClose }) => {
+const RewardDialog = ({ difficulty, onClose, onContinuePlaying }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -126,7 +126,21 @@ const RewardDialog = ({ difficulty, onClose }) => {
               }}>
               <NewButton
                 color="primary"
-                title="Continue"
+                title="Continue Playing"
+                onPress={() => {
+                  onContinuePlaying();
+                }}
+              />
+            </View>
+            <View
+              style={{
+                width: "100%",
+                height: "auto",
+                flexDirection: "row",
+              }}>
+              <NewButton
+                color="secondary"
+                title="Home"
                 onPress={() => {
                   onClose();
                 }}
