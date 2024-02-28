@@ -10,7 +10,7 @@ import Avatar from "../components/Avatar";
 import FlatButton from "../components/FlatButton";
 import COLORS from "../constants/colors";
 
-const Nav = ({ onToggleSettings }) => {
+const Nav = ({ user, onToggleSettings }) => {
   return (
     <>
       <View
@@ -27,7 +27,7 @@ const Nav = ({ onToggleSettings }) => {
           <FlatButton onPress={() => onToggleSettings()} />
         </View>
         <View style={{ width: 40, borderWidth: 0 }}>
-          <Avatar level="null" />
+          <Avatar user={user}/>
         </View>
       </View>
     </>

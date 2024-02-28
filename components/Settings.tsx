@@ -5,12 +5,17 @@ import {
   ActivityIndicator,
   TextInput,
   Image,
+  Text,
+  TouchableOpacity,
 } from "react-native";
 import NewButton from "./NewButton";
 import COLORS from "../constants/colors";
 import { supabase } from "../lib/supabase";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
+import Avatar from "./Avatar";
+import { fetchUserProfile } from "../util/DatabaseManager";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface Props {
   size: number;
@@ -20,12 +25,11 @@ interface Props {
 
 const Settings = ({ onClose, user }) => {
   const [loading, setLoading] = useState(false);
-  const [username, setUsername] = useState("");
+  const [currentUserData, setCurrentUserData] = useState([]);
   const navigation = useNavigation();
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarImage, setAvatarImage] = useState("");
-  const avatarSize = { height: 500, width: 500 };
 
   useEffect(() => {
     if (user) getProfile();
@@ -36,51 +40,38 @@ const Settings = ({ onClose, user }) => {
   // }, [avatarUrl]);
 
   async function downloadImage(path: string) {
-    try {
-      const response = await supabase.storage
-        .from("avatars")
-        .getPublicUrl(path);
+    if (path !== null) {
+      try {
+        const response = await supabase.storage
+          .from("avatars")
+          .getPublicUrl(path);
 
-      if (!response.data) {
-        alert("Error downloading image");
-      }
+        if (!response.data) {
+          alert("Error downloading image");
+        }
 
-      setAvatarImage(response.data.publicUrl);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log("Error downloading image: ", error.message);
+        setAvatarImage(response.data.publicUrl);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.log("Error downloading image: ", error.message);
+        }
       }
     }
   }
 
   async function getProfile() {
-    try {
-      setLoading(true);
-      if (!user) throw new Error("No user on the session!");
+    setLoading(true);
 
-      const { data, error, status } = await supabase
-        .from("profiles")
-        .select(`username, avatar_url`)
-        .eq("id", user)
-        .single();
-      if (error && status !== 406) {
-        throw error;
-      }
-
-      if (data) {
-        console.log("User profile fetched:");
-        console.log(data);
-        //  setUsername(data.username);
+    // Load profile data
+    await fetchUserProfile(user).then(async ({ data, error }) => {
+      if (error) {
+        console.error("Error fetching user profile:", error);
+      } else {
+        await setCurrentUserData(data);
         await downloadImage(data.avatar_url);
-        // setAvatarUrl(data.avatar_url);
+        setLoading(false);
       }
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(error.message);
-      }
-    } finally {
-      setLoading(false);
-    }
+    });
   }
 
   async function updateProfile(path: string) {
@@ -196,39 +187,81 @@ const Settings = ({ onClose, user }) => {
                 alignItems: "center",
                 alignSelf: "center",
                 justifyContent: "center",
-                gap: 20,
+                gap: 15,
               }}>
-              {avatarImage ? (
-                <Image
-                  source={{ uri: avatarImage }}
-                  accessibilityLabel="Avatar"
-                  style={{
-                    borderRadius: 200,
-                    width: "100%",
-                    height: "auto",
-                    aspectRatio: 1,
-                    flexDirection: "row",
-                    marginHorizontal: "auto",
-                  }}
-                />
+              {currentUserData.avatar_url ? (
+                <>
+                  <TouchableOpacity
+                    activeOpacity={0.5}
+                    style={{
+                      position: "relative",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    onPress={uploadAvatar}
+                    disabled={uploading}>
+                    <View
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        borderRadius: 200,
+                        zIndex: 1,
+                      }}>
+                      <MaterialCommunityIcons
+                        style={{
+                          position: "absolute",
+                          alignSelf: "center",
+                          margin: "auto",
+                          zIndex: 1,
+                        }}
+                        name="camera"
+                        size={60}
+                        color="white"
+                      />
+                    </View>
+                    <Image
+                      source={{ uri: avatarImage }}
+                      accessibilityLabel="Avatar"
+                      resizeMode="cover"
+                      style={{
+                        borderRadius: 200,
+                        width: "100%",
+                        height: "auto",
+                        aspectRatio: 1,
+                        flexDirection: "row",
+                        marginHorizontal: "auto",
+                      }}
+                    />
+                  </TouchableOpacity>
+                </>
               ) : (
-                <View
-                  style={{
-                    borderRadius: 200,
-                    width: "100%",
-                    height: "auto",
-                    aspectRatio: 1,
-                    flexDirection: "row",
-                    marginHorizontal: "auto",
-                    backgroundColor: COLORS.primary,
-                  }}></View>
+                <>
+                  <View
+                    style={{
+                      borderRadius: 200,
+                      width: "100%",
+                      height: "auto",
+                      aspectRatio: 1,
+                      flexDirection: "row",
+                      marginHorizontal: "auto",
+                      backgroundColor: currentUserData.color,
+                    }}></View>
+                </>
               )}
-              <NewButton
+              {/*<NewButton
                 color="secondary"
+                size="small"
                 title={uploading ? "Uploading ..." : "Upload Image"}
                 onPress={uploadAvatar}
                 disabled={uploading}
-              />
+                  />*/}
             </View>
             <TextInput
               style={{
@@ -293,11 +326,7 @@ const Settings = ({ onClose, user }) => {
                   flex: 1,
                   flexDirection: "row",
                 }}>
-                <NewButton
-                  title="Save"
-                  color="primary"
-                  onPress={() => supabase.auth.signOut()}
-                />
+                <NewButton title="Save" color="primary" onPress={() => null} />
               </View>
               <View
                 style={{

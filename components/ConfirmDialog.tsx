@@ -6,7 +6,7 @@ import COLORS from "../constants/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 
-const ConfirmDialog = (props) => {
+const ConfirmDialog = ({ user, opponent, onClose }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const ConfirmDialog = (props) => {
                 style={{
                   width: 80,
                 }}>
-                <Avatar level="null" />
+                <Avatar user={user} />
               </View>
               <View style={{}}>
                 <MaterialCommunityIcons
@@ -70,7 +70,7 @@ const ConfirmDialog = (props) => {
                 style={{
                   width: 80,
                 }}>
-                <Avatar level="null" />
+                <Avatar user={opponent} />
               </View>
             </View>
             <Text
@@ -96,7 +96,7 @@ const ConfirmDialog = (props) => {
                 color="primary"
                 title="Continue"
                 onPress={() => {
-                  props.onClose();
+                  onClose();
                 }}
               />
             </View>

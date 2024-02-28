@@ -16,7 +16,7 @@ import ViewShot from "react-native-view-shot";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 
-const Canvas = ({ onSubmitDraw, word }) => {
+const Canvas = ({ onSubmitDraw, word, user }) => {
   const [paths, setPaths] = useState([]);
   const [currentPath, setCurrentPath] = useState([]);
   const [selectedColor, setSelectedColor] = useState("#000000");
@@ -143,81 +143,6 @@ const Canvas = ({ onSubmitDraw, word }) => {
 
   return (
     <>
-      <View
-        style={{
-          width: "100%",
-          height: "auto",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingTop: 20,
-          gap: 20,
-        }}>
-        <View
-          style={{
-            width: "100%",
-            flex: 1,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            gap: 20,
-          }}>
-          <View
-            style={{
-              marginLeft: 20,
-              backgroundColor: COLORS.secondary,
-              width: 60,
-              height: 60,
-            }}>
-            <Avatar level="null" />
-          </View>
-          <View
-            style={{
-              flex: 1,
-              height: 60,
-              paddingLeft: 30,
-              paddingRight: 20,
-              paddingVertical: 10,
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              borderTopStartRadius: 40,
-              borderBottomStartRadius: 40,
-              backgroundColor: COLORS.primary,
-              shadowColor: "rgba(0, 0, 0, 0.5)",
-              shadowOffset: {
-                width: 0,
-                height: 0,
-              },
-              shadowOpacity: 0.34,
-              shadowRadius: 6.27,
-              elevation: 10,
-            }}>
-            <View
-              style={{
-                flexDirection: "column",
-                alignItems: "flex-start",
-                justifyContent: "flex-start",
-                gap: 0,
-              }}>
-              <Text
-                selectable={false}
-                style={{
-                  textTransform: "uppercase",
-                  fontSize: 20,
-                  fontFamily: "Kanit-SemiBold",
-                  color: "white",
-                  lineHeight: 36,
-                  textShadowColor: "rgba(0, 0, 0, 0.25)",
-                  textShadowOffset: { width: 0, height: 2 },
-                  textShadowRadius: 4,
-                }}>
-                you are drawing {staticword}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </View>
 
       <ViewShot
         ref={viewShotRef}

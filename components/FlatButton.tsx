@@ -2,6 +2,7 @@ import { TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { Audio } from "expo-av";
 import { Feather } from "@expo/vector-icons";
+import COLORS from "../constants/colors";
 
 const FlatButton = (props) => {
   const [isPressed, setIsPressed] = useState(false);
@@ -18,7 +19,7 @@ const FlatButton = (props) => {
     setIsPressed(false);
   };
 
-  const { iconName = "settings", iconSize = 30, iconColor = "white", iconLibrary = "Feather" } = props;
+  const { iconName = "settings", iconSize = 30, iconColor = COLORS.text, iconLibrary = "Feather" } = props;
 
   let IconComponent;
   switch (iconLibrary) {

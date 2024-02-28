@@ -5,8 +5,10 @@ import {
   StatusBar,
   View,
   StyleSheet,
+  Text,
   LogBox,
   ImageBackground,
+  TouchableOpacity,
 } from "react-native";
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -24,6 +26,7 @@ import Landing from "./screens/Landing";
 import SignUp from "./screens/SignUp";
 import Leaderboard from "./screens/Leaderboard";
 import COLORS from "./constants/colors";
+import FlatButton from "./components/FlatButton";
 import AudioPlayer from "./util/AudioPlayer";
 import { supabase } from "./lib/supabase";
 import { Session } from "@supabase/supabase-js";
@@ -125,11 +128,13 @@ const App = () => {
               <Stack.Navigator
                 initialRouteName="Home"
                 screenOptions={{
+                  headerStyle: {
+                    backgroundColor: "transparent",
+                  },
+                  headerShadowVisible: false,
                   cardStyle: {
                     backgroundColor: "transparent",
                   },
-                  headerShown: false,
-                  headerBackVisible: false,
                   animation: "slide_from_right",
                 }}>
                 <Stack.Screen
@@ -159,6 +164,10 @@ const App = () => {
                 <Stack.Screen
                   name="Leaderboard"
                   component={Leaderboard}
+                  initialParams={{
+                    key: session.user.id,
+                    session: session,
+                  }}
                   options={{ headerShown: false }}
                 />
               </Stack.Navigator>

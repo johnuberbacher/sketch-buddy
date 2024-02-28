@@ -5,7 +5,7 @@ import COLORS from "../constants/colors";
 import { supabase } from "../lib/supabase";
 import { useNavigation } from "@react-navigation/native";
 
-const ChooseWord = ({ user, selectedGame, onClose }) => {
+const ChooseWord = ({ user, game, onChooseWord }) => {
   const [loading, setLoading] = useState(true);
   const [remoteData, setRemoteData] = useState([]);
   const [userCoins, setUserCoins] = useState(0);
@@ -103,16 +103,16 @@ const ChooseWord = ({ user, selectedGame, onClose }) => {
       const { data, error } = await supabase
         .from("games")
         .update({ word: word, difficulty: difficulty })
-        .eq("id", selectedGame.id);
+        .eq("id", game.id);
 
       if (error) {
         console.error("Error updating game word:", error);
         throw new Error("Error updating game word");
       }
 
-      selectedGame.word = word;
+      game.word = word;
       setLoading(false);
-      onClose();
+      onChooseWord();
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error in updateGameWord:", error.message);

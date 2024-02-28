@@ -22,12 +22,13 @@ import RewardDialog from "../components/RewardDialog";
 import Loading from "../components/Loading";
 import { supabase } from "../lib/supabase";
 import { Svg, Path } from "react-native-svg";
+import { fetchGameData } from "../util/DatabaseManager";
 
 const Guess = ({ route, navigation }) => {
   const [isRewardDialogVisible, setIsRewardDialogVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [drawingPaths, setDrawingPaths] = useState([]);
-  const { game, user } = route.params;
+  const { game, user, opponent } = route.params;
   const responses = [
     "You really know how to sketch out the correct answer!",
     "That's the right sketch of things!",
@@ -54,38 +55,25 @@ const Guess = ({ route, navigation }) => {
   }, [navigation]);
 
   async function fetchDrawing() {
-    try {
-      const { data, error } = await supabase
-        .from("games")
-        .select("svg")
-        .eq("id", game.id)
-        .limit(1)
-        .single();
-
+    await fetchGameData(game.id).then(({ data, error }) => {
       if (error) {
-        throw new Error(`Error fetching game ${game.id}: ${error.message}`);
+        console.error("Error fetching game data:", error);
+      } else {
+        // Use a loop with setTimeout to add each entry to drawingPaths with a 1-second delay
+        const svgArray = data.svg || [];
+        for (let i = 0; i < svgArray.length; i++) {
+          setTimeout(() => {
+            setDrawingPaths((prevPaths) => [...prevPaths, svgArray[i]]);
+          }, i * 1000); // 1000 milliseconds = 1 second
+        }
+        setLoading(false);
       }
-
-      // Use a loop with setTimeout to add each entry to drawingPaths with a 1-second delay
-      const svgArray = data.svg || [];
-      for (let i = 0; i < svgArray.length; i++) {
-        setTimeout(() => {
-          setDrawingPaths((prevPaths) => [...prevPaths, svgArray[i]]);
-        }, i * 1000); // 1000 milliseconds = 1 second
-      }
-
-      setLoading(false);
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(error.message);
-      }
-    }
+    });
   }
 
   async function updateUserStats() {
     try {
       const updateUserData = async (userId) => {
-        
         const userData = await supabase
           .from("profiles")
           .select("rank, coins")
@@ -154,14 +142,14 @@ const Guess = ({ route, navigation }) => {
         );
       }
 
-      const turn = game.user1 === user ? game.user2 : game.user1;
+      const turn = game.user1 === user.id ? game.user2 : game.user1;
       const streak = gameData.data.streak + 1;
 
       const { data, error } = await supabase
         .from("games")
         .update({
           word: null,
-          turn: user,
+          turn: turn,
           action: "draw",
           streak: streak,
         })
@@ -182,14 +170,14 @@ const Guess = ({ route, navigation }) => {
     updateUserStats();
     updateGameTurn();
     setIsRewardDialogVisible(true);
-     setLoading(false);
+    setLoading(false);
   };
 
   const handleRequestHelp = async () => {
     // check if enough coins
     // remove letters
     // remove coins
-  }
+  };
 
   const onContinuePlaying = () => {
     setIsRewardDialogVisible(false);
@@ -215,6 +203,8 @@ const Guess = ({ route, navigation }) => {
           props=""
           title={responses[Math.floor(Math.random() * responses.length)]}>
           <RewardDialog
+            user={user}
+            opponent={opponent}
             onContinuePlaying={() => onRewardDialog()}
             onClose={() => onRewardDialog()}
             difficulty={game.difficulty}
@@ -272,18 +262,22 @@ const Guess = ({ route, navigation }) => {
                     width: 60,
                     height: 60,
                   }}>
-                  <Avatar level="null" />
+                  <Avatar user={opponent} />
                 </View>
                 <View
                   style={{
                     flex: 1,
-                    height: 60,
-                    paddingLeft: 30,
-                    paddingRight: 20,
-                    paddingVertical: 10,
+                    display: "flex",
                     flexDirection: "row",
-                    justifyContent: "space-between",
                     alignItems: "center",
+                    alignContent: "center",
+                    justifyContent: "flex-start",
+                    flexWrap: "wrap",
+                    height: 60,
+                    width: "100%",
+                    paddingLeft: 25,
+                    paddingRight: 20,
+                    paddingTop: 4,
                     borderTopStartRadius: 40,
                     borderBottomStartRadius: 40,
                     backgroundColor: COLORS.primary,
@@ -296,28 +290,25 @@ const Guess = ({ route, navigation }) => {
                     shadowRadius: 6.27,
                     elevation: 10,
                   }}>
-                  <View
+                  <Text
+                    selectable={false}
                     style={{
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                      justifyContent: "flex-start",
-                      gap: 0,
+                      fontSize: 19,
+                      lineHeight: 22,
+                      alignSelf: "flex-start",
+                      fontFamily: "Kanit-Medium",
+                      color: "white",
+                      textShadowColor: "rgba(0, 0, 0, 0.25)",
+                      textShadowOffset: { width: 0, height: 1 },
+                      textShadowRadius: 2,
                     }}>
+                    Guessing for 
                     <Text
                       selectable={false}
-                      style={{
-                        textTransform: "uppercase",
-                        fontSize: 20,
-                        fontFamily: "Kanit-SemiBold",
-                        color: "white",
-                        lineHeight: 36,
-                        textShadowColor: "rgba(0, 0, 0, 0.25)",
-                        textShadowOffset: { width: 0, height: 2 },
-                        textShadowRadius: 4,
-                      }}>
-                      Guess username's word!
+                      style={{ fontFamily: "Kanit-Bold" }}>
+                      {' ' + opponent.username}
                     </Text>
-                  </View>
+                  </Text>
                 </View>
               </View>
             </View>
@@ -348,7 +339,7 @@ const Guess = ({ route, navigation }) => {
                   aspectRatio: 1,
                   position: "relative",
                 }}>
-                <Svg style={svgStyles}>
+                <Svg style={styles.svgContainer}>
                   {drawingPaths?.map((pathObject, pathIndex) => (
                     <Path
                       key={pathObject + pathIndex}
@@ -428,6 +419,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+    width: "100%",
+    height: "100%",
   },
 });
 

@@ -12,7 +12,7 @@ import COLORS from "../constants/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 
-const RewardDialog = ({ difficulty, onClose, onContinuePlaying }) => {
+const RewardDialog = ({ user, opponent, difficulty, onClose, onContinuePlaying }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -63,13 +63,13 @@ const RewardDialog = ({ difficulty, onClose, onContinuePlaying }) => {
                 style={{
                   width: 80,
                 }}>
-                <Avatar level="null" />
+                <Avatar user={user}/>
               </View>
               <View
                 style={{
                   width: 80,
                 }}>
-                <Avatar level="null" />
+                <Avatar user={opponent}/>
               </View>
             </View>
             <View

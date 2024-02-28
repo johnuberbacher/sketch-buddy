@@ -20,8 +20,16 @@ import ChooseWord from "../components/ChooseWord";
 import Modal from "../components/Modal";
 import CreateGame from "../components/CreateGame";
 import Settings from "../components/Settings";
+import {
+  fetchUserProfile,
+  fetchAllUsers,
+  fetchUsers,
+  fetchUserData,
+  updateUserData,
+} from "../util/DatabaseManager";
 
 const Leaderboard = ({ route }) => {
+  const { key, session } = route.params;
   const [loading, setLoading] = useState(true);
   const [isSettingsVisibleModal, setIsSettingsVisibleModal] = useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -30,49 +38,35 @@ const Leaderboard = ({ route }) => {
   const navigation = useNavigation();
 
   async function fetchData() {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, username, rank");
-
+    // Load users data from games
+    fetchAllUsers().then(({ data, error }) => {
       if (error) {
-        throw new Error(`Error fetching users data: ${error.message}`);
+        console.error("Error updating user data:", error);
+      } else {
+        // Sort data by Rank
+        const sortedData = data.sort((a, b) => b.rank - a.rank);
+
+        // const topUsers = sortedData;
+        const topUsers = sortedData.slice(0, 3);
+
+        // Swap the first two users
+        [topUsers[0], topUsers[1]] = [topUsers[1], topUsers[0]];
+
+        setTopUsersData(topUsers);
+
+        // Omit top 3 users from usersData
+        const remainingUsers = sortedData;
+        setUsersData(remainingUsers);
       }
-
-      // Sort data by Rank
-      const sortedData = data.sort((a, b) => b.rank - a.rank);
-
-      // const topUsers = sortedData;
-      const topUsers = sortedData.slice(0, 3);
-
-      // Swap the first two users
-      [topUsers[0], topUsers[1]] = [topUsers[1], topUsers[0]];
-
-      setTopUsersData(topUsers);
-
-      // Omit top 3 users from usersData
-      const remainingUsers = sortedData;
-      setUsersData(remainingUsers);
-    } catch (error) {
-      console.error("Error fetching users data:", error.message);
-      alert(error.message);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+    });
+    setLoading(false);
+    setRefreshing(false);
   }
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     fetchData();
   }, []);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, [navigation]);
 
   useEffect(() => {
     setLoading(true);
@@ -102,7 +96,6 @@ const Leaderboard = ({ route }) => {
         </View>
       ) : (
         <>
-          <Nav onToggleSettings={() => setIsSettingsVisibleModal(true)} />
           {isSettingsVisibleModal && (
             <Modal props="" title="Settings">
               <Settings onClose={() => setIsSettingsVisibleModal(false)} />
@@ -165,7 +158,8 @@ const Leaderboard = ({ route }) => {
                           width: index === 1 ? 100 : 80,
                           overflow: "hidden",
                         }}>
-                        <Avatar level="null" />
+                        <Avatar user={user}
+                        />
                       </View>
                       <View
                         style={{
@@ -212,21 +206,58 @@ const Leaderboard = ({ route }) => {
                     </View>
                   ))}
                 </View>
-                {usersData.map((user) => (
+                {usersData.map((user, index) => (
                   <View key={user.id} style={styles.menuInner}>
                     <View
                       style={{
                         width: "100%",
                         flexDirection: "row",
                         justifyContent: "flex-start",
+                        alignItems: "center",
                         gap: 10,
                         flex: 1,
                       }}>
                       <View
                         style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 30,
+                          height: 30,
+                          borderWidth: 4,
+                          borderColor: "white",
+                          aspectRatio: 1,
+                          backgroundColor:
+                            index === 0
+                              ? COLORS.secondary
+                              : index === 1
+                              ? COLORS.primary
+                              : COLORS.primary,
+                          borderRadius: 300,
+                        }}>
+                        <Text
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            height: "100%",
+                            width: "100%",
+                            fontSize: 13,
+                            fontFamily: "Kanit-Bold",
+                            textAlign: "center",
+                            color: "white",
+                          }}>
+                          {index + 1}
+                        </Text>
+                      </View>
+                      <View
+                        style={{
                           width: 60,
                         }}>
-                        <Avatar level={user.rank} />
+                        <Avatar user={user}
+                        />
                       </View>
                       <View
                         style={{

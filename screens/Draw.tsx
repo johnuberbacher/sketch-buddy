@@ -1,17 +1,18 @@
-import { ScrollView, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import { Text, ScrollView, View } from "react-native";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 import Canvas from "../components/Canvas";
-import { useLayoutEffect } from "react";
 import ConfirmDialog from "../components/ConfirmDialog";
 import Modal from "../components/Modal";
 import Loading from "../components/Loading";
 import { supabase } from "../lib/supabase";
 import COLORS from "../constants/colors";
+import Avatar from "../components/Avatar";
+import { fetchGameData } from "../util/DatabaseManager";
 
 const Draw = ({ route, navigation }) => {
   const [isConfirmDialogVisible, setIsConfirmDialogVisible] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { game, user } = route.params;
+  const { game, user, opponent } = route.params;
 
   useEffect(() => {
     if (game.word) {
@@ -30,7 +31,7 @@ const Draw = ({ route, navigation }) => {
     try {
       setLoading(true);
 
-      const turn = game.user1 === user ? game.user2 : game.user1;
+      const turn = game.user1 === user.id ? game.user2 : game.user1;
 
       const { data, error } = await supabase
         .from("games")
@@ -67,7 +68,11 @@ const Draw = ({ route, navigation }) => {
       {loading && <Loading />}
       {isConfirmDialogVisible && (
         <Modal props="" title="Drawing sent!">
-          <ConfirmDialog onClose={() => onConfirmDialog()} />
+          <ConfirmDialog
+            user={user}
+            opponent={opponent}
+            onClose={() => onConfirmDialog()}
+          />
         </Modal>
       )}
       <ScrollView
@@ -95,11 +100,93 @@ const Draw = ({ route, navigation }) => {
               height: "100%",
               gap: 20,
             }}>
+            <View
+              style={{
+                width: "100%",
+                height: "auto",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingTop: 20,
+                gap: 20,
+              }}>
+              <View
+                style={{
+                  width: "100%",
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: 20,
+                }}>
+                <View
+                  style={{
+                    marginLeft: 20,
+                    backgroundColor: COLORS.secondary,
+                    width: 60,
+                    height: 60,
+                  }}>
+                  <Avatar user={opponent} />
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    alignContent: "center",
+                    justifyContent: "flex-start",
+                    flexWrap: "wrap",
+                    height: 60,
+                    width: "100%",
+                    paddingLeft: 25,
+                    paddingRight: 20,
+                    paddingTop: 4,
+                    borderTopStartRadius: 40,
+                    borderBottomStartRadius: 40,
+                    backgroundColor: COLORS.primary,
+                    shadowColor: "rgba(0, 0, 0, 0.5)",
+                    shadowOffset: {
+                      width: 0,
+                      height: 0,
+                    },
+                    shadowOpacity: 0.34,
+                    shadowRadius: 6.27,
+                    elevation: 10,
+                  }}>
+                  <Text
+                    selectable={false}
+                    style={{
+                      fontSize: 19,
+                      lineHeight: 22,
+                      alignSelf: "flex-start",
+                      fontFamily: "Kanit-Medium",
+                      color: "white",
+                      textShadowColor: "rgba(0, 0, 0, 0.25)",
+                      textShadowOffset: { width: 0, height: 1 },
+                      textShadowRadius: 2,
+                    }}>
+                    Drawing{" "}
+                    <Text
+                      selectable={false}
+                      style={{ fontFamily: "Kanit-Bold" }}>
+                      {game.word}
+                    </Text>{" "}
+                    for{" "}
+                    <Text
+                      selectable={false}
+                      style={{ fontFamily: "Kanit-Bold" }}>
+                      {opponent.username}
+                    </Text>
+                  </Text>
+                </View>
+              </View>
+            </View>
+
             <Canvas
-              onSubmitDraw={(paths) =>
-                handleSubmitDrawing(paths)
-              }
+              onSubmitDraw={(paths) => handleSubmitDrawing(paths)}
               word={game.word}
+              user={user}
             />
           </View>
         </View>

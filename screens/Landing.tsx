@@ -41,7 +41,7 @@ const Landing = () => {
     const { error } = await supabase.auth.signUp({
       email: email,
       password: password,
-      options: { data: { username: username, rank: 1, coins: 0 } },
+      options: { data: { username: username, rank: 1, coins: 0, avatar_url: null } },
     });
 
     if (error) Alert.alert(error.message);
@@ -100,7 +100,7 @@ const Landing = () => {
             marginHorizontal: "auto",
             marginBottom: -20,
           }}
-          source={require("../assets/fox.png")}
+          source={require("../assets/players.png")}
           resizeMode={"cover"}></ImageBackground>
         <ImageBackground
           style={{
@@ -251,7 +251,6 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center", 
-    backgroundColor: COLORS.secondary,
   },
   overlayInner: {
     maxWidth: 500,

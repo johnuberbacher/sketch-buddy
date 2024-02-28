@@ -15,72 +15,43 @@ import COLORS from "../constants/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import { supabase } from "../lib/supabase";
+import { fetchAllUsers, createGame } from "../util/DatabaseManager";
 
 const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
   const [usersData, setUsersData] = useState([]);
 
   async function fetchData() {
     setLoading(true);
-    try {
-      // Load users
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, username, rank");
 
+    // Load users data from games
+    await fetchAllUsers().then(({ data, error }) => {
       if (error) {
-        throw new Error(`Error fetching users data: ${error.message}`);
+        console.error("Error updating user data:", error);
+      } else {
+        const sortedData = data.sort((a, b) => b.rank - a.rank);
+        setUsersData(sortedData);
       }
+    });
 
-      const sortedData = data.sort((a, b) => b.rank - a.rank);
-
-      setUsersData(sortedData);
-    } catch (error) {
-      console.error("Error fetching users data:", error.message);
-      alert(error.message);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+    setLoading(false);
+    setRefreshing(false);
   }
 
-  const createNewGame = async (opponent) => {
+  const challengeUser = async (opponent) => {
     setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("games")
-        .upsert([
-          {
-            user1: currentUserData.id,
-            user1username: currentUserData.username,
-            user2: opponent.id,
-            user2username: opponent.username, 
-            turn: currentUserData.id,
-            action: "draw",
-            word: null,
-            difficulty: null,
-            streak: 0,
-            svg: null,
-            aspectRatio: null,
-          },
-        ])
-        .select()
-        .limit(1)
-        .single();
 
+    // Add new game to the database
+    await createGame(currentUserData, opponent).then(({ data, error }) => {
       if (error) {
-        throw new Error(`Error creating game: ${error.message}`);
+        console.error("Error updating new game data:", error);
+      } else {
+        onPlayGame(data);
+        setLoading(false);
+        setRefreshing(false);
       }
-
-      onPlayGame(data);
-    } catch (error) {
-      console.error("Error creating game:", error.message);
-      alert(error.message);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+    });
   };
 
   const onRefresh = React.useCallback(() => {
@@ -141,8 +112,8 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
                     onRefresh={onRefresh}
                   />
                 }>
-                {usersData.map((user) => (
-                  <View key={user.id} style={styles.menuInner}>
+                {usersData.map((opponent) => (
+                  <View key={opponent.id} style={styles.menuInner}>
                     <View
                       style={{
                         width: "100%",
@@ -155,7 +126,7 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
                         style={{
                           width: 60,
                         }}>
-                        <Avatar level={user.rank} />
+                        <Avatar user={opponent} />
                       </View>
                       <View
                         style={{
@@ -174,7 +145,7 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
                             gap: 10,
                           }}>
                           <Text selectable={false} style={styles.usernameTitle}>
-                            {user.username}
+                            {opponent.username}
                           </Text>
                         </View>
                       </View>
@@ -191,7 +162,7 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
                         title="Play"
                         size="small"
                         onPress={() => {
-                          createNewGame(user);
+                          challengeUser(opponent);
                         }}
                         color="green"
                       />

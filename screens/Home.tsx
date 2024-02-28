@@ -21,21 +21,31 @@ import ChooseWord from "../components/ChooseWord";
 import Modal from "../components/Modal";
 import CreateGame from "../components/CreateGame";
 import Settings from "../components/Settings";
+import {
+  fetchUserProfile,
+  fetchUserGames,
+  fetchUsers,
+  fetchUserData,
+  updateUserData,
+} from "../util/DatabaseManager";
 
 const Home = ({ route }) => {
   // Accessing the parameters from initialParams
   const { key, session } = route.params;
   const [loading, setLoading] = useState(true);
-  const [gamesData, setGamesData] = useState<any[]>([]);
-  const [currentUserData, setCurrentUserData] = useState<any>();
+  const [gamesData, setGamesData] = useState([]);
+  const [gamesUsersData, setGamesUsersData] = useState([]);
   const navigation = useNavigation();
   const [isChooseWordModalVisible, setIsChooseWordModalVisible] =
     useState(false);
   const [isCreateGameModalVisible, setIsCreateGameModalVisible] =
     useState(false);
   const [isSettingsVisibleModal, setIsSettingsVisibleModal] = useState(false);
-  const [selectedGame, setSelectedGame] = useState();
   const [refreshing, setRefreshing] = React.useState(false);
+
+  const [currentUserData, setCurrentUserData] = useState([]);
+  const [selectedGame, setSelectedGame] = useState();
+  const [selectedOpponent, setSelectedOpponent] = useState([]);
 
   const createGame = async () => {
     setIsCreateGameModalVisible(true);
@@ -55,50 +65,74 @@ const Home = ({ route }) => {
 
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      navigation.reset({
-        index: 0,
-        routes: [
-          { name: route, params: { game: game, user: session?.user.id } },
-        ],
+      const opponentId =
+        game.user1 === session.user.id ? game.user2 : game.user1;
+
+      // Load Opponent
+      await fetchUserProfile(opponentId).then(({ data, error }) => {
+        if (error) {
+          console.error("Error fetching opponent profile:", error);
+        } else {
+          // Navigate to Draw or Guess
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: route,
+                params: {
+                  game: game,
+                  user: currentUserData,
+                  opponent: data,
+                },
+              },
+            ],
+          });
+          setLoading(false);
+        }
       });
-      setLoading(false);
     }
   };
 
   async function fetchData() {
-    try {
-      // Load profile data
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("id, username, rank, coins")
-        .eq("id", session?.user.id)
-        .limit(1)
-        .single();
+    // Load profile data
+    await fetchUserProfile(session.user.id).then(({ data, error }) => {
+      if (error) {
+        console.error("Error fetching user profile:", error);
+      } else {
+        setCurrentUserData(data);
+      }
+    });
 
-      setCurrentUserData(profileData);
-
-      // Load relevant games data
-      const { data: relevantGamesData } = await supabase
-        .from("games")
-        .select("*")
-        .or(
-          "user1.eq." + session.user.id + ",user2.eq." + session.user.id + ""
+    // Load games list
+    await fetchUserGames(session.user.id).then(({ data, error }) => {
+      if (error) {
+        console.error("Error updating user data:", error);
+      } else {
+        const sortedGamesData = data.sort(
+          (a, b): number =>
+            (b.turn === session.user.id ? 1 : 0) -
+            (a.turn === session.user.id ? 1 : 0)
         );
+        setGamesData(sortedGamesData);
+      }
+    });
 
-      const sortedGamesData = relevantGamesData.sort(
-        (a, b): number =>
-          (b.turn === session.user.id ? 1 : 0) -
-          (a.turn === session.user.id ? 1 : 0)
-      );
+    // Extract unique user IDs from sortedGamesData
+    const uniqueUserIds = await [
+      ...new Set(gamesData.flatMap((game) => [game.user1, game.user2])),
+    ].filter((userId) => userId !== session.user.id);
 
-      setGamesData(sortedGamesData);
-    } catch (error) {
-      console.error("Error in fetchData:", error.message);
-      alert(error.message);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+    // Load users data from games
+    await fetchUsers(uniqueUserIds).then(({ data, error }) => {
+      if (error) {
+        console.error("Error updating user data:", error);
+      } else {
+        setGamesUsersData(data);
+      }
+    });
+
+    setLoading(false);
+    setRefreshing(false);
   }
 
   const onRefresh = React.useCallback(() => {
@@ -107,7 +141,6 @@ const Home = ({ route }) => {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
     fetchData();
   }, []);
 
@@ -134,7 +167,10 @@ const Home = ({ route }) => {
         </View>
       ) : (
         <>
-          <Nav onToggleSettings={() => setIsSettingsVisibleModal(true)} />
+          <Nav
+            user={currentUserData}
+            onToggleSettings={() => setIsSettingsVisibleModal(true)}
+          />
           {isCreateGameModalVisible && (
             <Modal props="" title="Challenge someone to a game">
               <CreateGame
@@ -148,14 +184,17 @@ const Home = ({ route }) => {
             <Modal props="" title="Choose a word to draw">
               <ChooseWord
                 user={session.user.id}
-                selectedGame={selectedGame}
-                onClose={() => playGame(selectedGame)}
+                game={selectedGame}
+                onChooseWord={() => playGame(selectedGame)}
               />
             </Modal>
           )}
           {isSettingsVisibleModal && (
             <Modal props="" title="Settings">
-              <Settings onClose={() => setIsSettingsVisibleModal(false)} user={session.user.id}/>
+              <Settings
+                onClose={() => setIsSettingsVisibleModal(false)}
+                user={session.user.id}
+              />
             </Modal>
           )}
           <ScrollView
@@ -347,7 +386,7 @@ const Home = ({ route }) => {
                       flexDirection: "column",
                       justifyContent: "center",
                       alignItems: "center",
-                      paddingVertical: 10,
+                      paddingVertical: 30,
                       paddingHorizontal: 20,
                     }}>
                     <Text
@@ -358,110 +397,116 @@ const Home = ({ route }) => {
                         opacity: 0.5,
                         textAlign: "center",
                       }}>
-                      You don't have any games! Click the button below to start a new game.
+                      You don't have any games! Click the button below to start
+                      a new game.
                     </Text>
                   </View>
                 ) : (
-                  gamesData.map((game) => (
-                    <View key={game.id} style={styles.menuInner}>
-                      <View
-                        style={{
-                          width: "100%",
-                          flexDirection: "row",
-                          justifyContent: "flex-start",
-                          gap: 10,
-                          flex: 1,
-                        }}>
-                        <View
-                          style={{
-                            alignItems: "center",
-                            justifyContent: "center",
-                            height: 60,
-                            width: 60,
-                            backgroundColor: "rgba(0, 0, 0, 0.1)",
-                            borderRadius: 15,
-                            opacity: 0.75,
-                          }}>
-                          <Text
-                            style={{
-                              fontSize: 8,
-                              fontFamily: "Kanit-SemiBold",
-                              color: COLORS.text,
-                              marginBottom: -8,
-                              marginTop: 4,
-                            }}>
-                            STREAK
-                          </Text>
-                          <Text
-                            style={{
-                              fontSize: 24,
-                              fontFamily: "Kanit-SemiBold",
-                              color: COLORS.text,
-                            }}>
-                            {game.streak}
-                          </Text>
-                        </View>
-                        <View
-                          style={{
-                            width: 60,
-                          }}>
-                          <Avatar level="null" />
-                        </View>
+                  gamesData.map((game, index) => {
+                    return (
+                      <View key={game.id} style={styles.menuInner}>
                         <View
                           style={{
                             width: "100%",
-                            flexDirection: "column",
-                            justifyContent: "center",
-                            alignItems: "flex-start",
-                            gap: 2,
+                            flexDirection: "row",
+                            justifyContent: "flex-start",
+                            gap: 10,
+                            flex: 1,
                           }}>
+                          <View
+                            style={{
+                              alignItems: "center",
+                              justifyContent: "center",
+                              height: 60,
+                              width: 60,
+                              backgroundColor: "rgba(0, 0, 0, 0.1)",
+                              borderRadius: 15,
+                              opacity: 0.75,
+                            }}>
+                            <Text
+                              style={{
+                                fontSize: 8,
+                                fontFamily: "Kanit-SemiBold",
+                                color: COLORS.text,
+                                marginBottom: -8,
+                                marginTop: 4,
+                              }}>
+                              STREAK
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 24,
+                                fontFamily: "Kanit-SemiBold",
+                                color: COLORS.text,
+                              }}>
+                              {game.streak}
+                            </Text>
+                          </View>
+                          <View
+                            style={{
+                              width: 60,
+                            }}>
+                            <Avatar user={gamesData} />
+                          </View>
                           <View
                             style={{
                               width: "100%",
                               flexDirection: "column",
-                              justifyContent: "flex-start",
+                              justifyContent: "center",
                               alignItems: "flex-start",
-                              gap: 0,
+                              gap: 2,
                             }}>
-                            <Text
-                              selectable={false}
-                              style={styles.usernameTitle}>
-                              {game.user1 === session.user.id
-                                ? game.user2username
-                                : game.user1username}
-                            </Text>
-                            <Text
-                              selectable={false}
-                              style={styles.textYourMove}>
-                              {game.turn === session.user.id
-                                ? "Your move!"
-                                : "Waiting..."}
-                            </Text>
+                            <View
+                              style={{
+                                width: "100%",
+                                flexDirection: "column",
+                                justifyContent: "flex-start",
+                                alignItems: "flex-start",
+                                gap: 0,
+                              }}>
+                              <Text
+                                selectable={false}
+                                style={styles.usernameTitle}>
+                                {game.user1 === session.user.id
+                                  ? game.user2username
+                                  : game.user1username}
+                              </Text>
+                              <Text
+                                selectable={false}
+                                style={styles.textYourMove}>
+                                {game.turn === session.user.id
+                                  ? "Your move!"
+                                  : "Waiting..."}
+                              </Text>
+                            </View>
                           </View>
                         </View>
+                        {game.turn === session.user.id && (
+                          <View
+                            style={{
+                              height: 40,
+                              width: "auto",
+                              flexDirection: "column",
+                              justifyContent: "flex-start",
+                              alignItems: "flex-start",
+                            }}>
+                            <NewButton
+                              title={
+                                game.action === "draw" ? "Draw!" : "Guess!"
+                              }
+                              size="small"
+                              onPress={() => {
+                                playGame(game);
+                              }}
+                              color="green"
+                            />
+                          </View>
+                        )}
                       </View>
-                      {game.turn === session.user.id && (
-                        <View
-                          style={{
-                            height: 40,
-                            width: "auto",
-                            flexDirection: "column",
-                            justifyContent: "flex-start",
-                            alignItems: "flex-start",
-                          }}>
-                          <NewButton
-                            title={game.action === "draw" ? "Draw!" : "Guess!"}
-                            size="small"
-                            onPress={() => {
-                              playGame(game);
-                            }}
-                            color="green"
-                          />
-                        </View>
-                      )}
-                    </View>
-                  ))
+                    );
+                  })
                 )}
+
                 <View
                   style={{
                     backgroundColor: "rgba(0, 0, 0, 0.0)",
