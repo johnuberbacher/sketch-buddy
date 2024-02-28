@@ -179,7 +179,7 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
               }}>
               <NewButton
                 color="primary"
-                title="Back"
+                title="Close"
                 onPress={() => {
                   onClose();
                 }}

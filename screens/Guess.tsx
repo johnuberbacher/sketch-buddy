@@ -22,7 +22,7 @@ import RewardDialog from "../components/RewardDialog";
 import Loading from "../components/Loading";
 import { supabase } from "../lib/supabase";
 import { Svg, Path } from "react-native-svg";
-import { fetchGameData } from "../util/DatabaseManager";
+import { fetchGameData, updateUserData } from "../util/DatabaseManager";
 
 const Guess = ({ route, navigation }) => {
   const [isRewardDialogVisible, setIsRewardDialogVisible] = useState(false);
@@ -72,59 +72,29 @@ const Guess = ({ route, navigation }) => {
   }
 
   async function updateUserStats() {
-    try {
-      const updateUserData = async (userId) => {
-        const userData = await supabase
-          .from("profiles")
-          .select("rank, coins")
-          .eq("id", userId)
-          .limit(1)
-          .single();
+    const reward =
+      game.difficulty === "easy" ? 1 : game.difficulty === "medium" ? 2 : 3;
 
-        if (userData.error) {
-          throw new Error(
-            `Error updating user ${userId}: ${userData.error.message}`
-          );
-        }
-
-        if (
-          !userData.data ||
-          userData.data.length === 0 ||
-          userData.data.coins === null
-        ) {
-          throw new Error(
-            `Invalid data for user ${userId}: Coins data is missing or null`
-          );
-        }
-
-        const updatedCoins = userData.data.coins + reward;
-
-        // Update user
-        const updateUser = await supabase
-          .from("profiles")
-          .update({ coins: updatedCoins })
-          .eq("id", userId);
-
-        if (updateUser.error) {
-          throw new Error(
-            `Error updating user ${userId}: ${updateUser.error.message}`
-          );
-        }
-      };
-
-      const reward =
-        game.difficulty === "easy" ? 1 : game.difficulty === "medium" ? 2 : 3;
-
-      // Update user 1
-      await updateUserData(game.user1);
-
-      // Update user 2 only after user 1 is updated
-      await updateUserData(game.user2);
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(error.message);
-      }
+    // Update User
+    const { data, error } = await updateUserData(user.id, {
+      coins: user.coins + reward,
+    });
+    if (error) {
+      console.error("Error updating user:", error);
+    } else {
+      setLoading(false);
     }
+
+    // Update Opponent
+    await updateUserData(opponent.id, { coins: opponent.coins + reward }).then(
+      ({ data, error }) => {
+        if (error) {
+          console.error("Error updating opponent:", error);
+        } else {
+          setLoading(false);
+        }
+      }
+    );
   }
 
   async function updateGameTurn() {
@@ -302,11 +272,11 @@ const Guess = ({ route, navigation }) => {
                       textShadowOffset: { width: 0, height: 1 },
                       textShadowRadius: 2,
                     }}>
-                    Guessing for 
+                    Guessing for
                     <Text
                       selectable={false}
                       style={{ fontFamily: "Kanit-Bold" }}>
-                      {' ' + opponent.username}
+                      {" " + opponent.username}
                     </Text>
                   </Text>
                 </View>

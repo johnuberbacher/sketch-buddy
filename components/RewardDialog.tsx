@@ -86,7 +86,7 @@ const RewardDialog = ({ user, opponent, difficulty, onClose, onContinuePlaying }
                   height: "auto",
                   fontSize: 20,
                   fontFamily: "Kanit-Bold",
-                  color: COLORS.secondary,
+                  color: COLORS.secondaryDark,
                   textAlign: "center",
                   paddingHorizontal: 20,
                   flexWrap: "wrap",
@@ -98,7 +98,7 @@ const RewardDialog = ({ user, opponent, difficulty, onClose, onContinuePlaying }
                   height: "auto",
                   flexDirection: "row",
                   justifyContent: "center",
-                  paddingLeft: 5,
+                  paddingLeft: 15,
                 }}>
                 {Array.from(
                   {
@@ -111,7 +111,7 @@ const RewardDialog = ({ user, opponent, difficulty, onClose, onContinuePlaying }
                   },
                   (_, index) => (
                     <ImageBackground
-                      style={{ width: 30, height: 30, marginLeft: -5 }}
+                      style={{ width: 50, height: 50, marginLeft: -15 }}
                       source={require("../assets/c.png")}
                       resizeMode={"contain"}></ImageBackground>
                   )

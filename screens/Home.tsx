@@ -63,7 +63,7 @@ const Home = ({ route }) => {
       let route = game.action.toString();
       route = route.charAt(0).toUpperCase() + route.slice(1);
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const opponentId =
         game.user1 === session.user.id ? game.user2 : game.user1;

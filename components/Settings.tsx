@@ -326,15 +326,8 @@ const Settings = ({ onClose, user }) => {
                   flex: 1,
                   flexDirection: "row",
                 }}>
-                <NewButton title="Save" color="primary" onPress={() => null} />
-              </View>
-              <View
-                style={{
-                  flex: 1,
-                  flexDirection: "row",
-                }}>
                 <NewButton
-                  color="secondary"
+                  color="primary"
                   title="Close"
                   onPress={() => onClose()}
                 />

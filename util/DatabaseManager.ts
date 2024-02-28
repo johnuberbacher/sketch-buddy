@@ -86,8 +86,7 @@ export const fetchGameData = async (gameId: string) => {
 };
 
 // Update user data
-export const updateUserData = async (userId: string, newData: any) => {
-  try {
+export const updateUserData = async (userId: string, newData: Record<string, any>) => {  try {
     const { data, error } = await supabase
       .from("users")
       .update(newData)

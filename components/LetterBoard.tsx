@@ -187,7 +187,7 @@ const LetterBoard = ({ word, difficulty, onGuessCorrect }) => {
           backgroundColor: "green",
           color: "white",
         });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        // await new Promise((resolve) => setTimeout(resolve, 2000));
         onGuessCorrect();
       } else {
         setVictoryStyles({});

@@ -104,6 +104,7 @@ const Avatar = ({ user }) => {
             }}>
             <Text
               style={{
+                textTransform: "uppercase",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

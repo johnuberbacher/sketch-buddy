@@ -143,8 +143,9 @@ const Leaderboard = ({ route }) => {
                   style={{
                     width: "100%",
                     flexDirection: "row",
-                    justifyContent: "space-around",
+                    justifyContent: "center",
                     alignItems: "center",
+                    gap: 40,
                   }}>
                   {topUsersData.map((user, index) => (
                     <View
@@ -158,8 +159,7 @@ const Leaderboard = ({ route }) => {
                           width: index === 1 ? 100 : 80,
                           overflow: "hidden",
                         }}>
-                        <Avatar user={user}
-                        />
+                        <Avatar user={user} />
                       </View>
                       <View
                         style={{
@@ -168,8 +168,8 @@ const Leaderboard = ({ route }) => {
                           alignItems: "center",
                           justifyContent: "center",
                           marginTop: -15,
-                          width: 30,
-                          height: 30,
+                          width: 40,
+                          height: 40,
                           borderWidth: 4,
                           borderColor: "white",
                           aspectRatio: 1,
@@ -183,12 +183,6 @@ const Leaderboard = ({ route }) => {
                         }}>
                         <Text
                           style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            height: "100%",
-                            width: "100%",
                             fontSize: 13,
                             fontFamily: "Kanit-Bold",
                             textAlign: "center",
@@ -214,7 +208,7 @@ const Leaderboard = ({ route }) => {
                         flexDirection: "row",
                         justifyContent: "flex-start",
                         alignItems: "center",
-                        gap: 10,
+                        gap: 20,
                         flex: 1,
                       }}>
                       <View
@@ -223,8 +217,8 @@ const Leaderboard = ({ route }) => {
                           flexDirection: "column",
                           alignItems: "center",
                           justifyContent: "center",
-                          width: 30,
-                          height: 30,
+                          width: 40,
+                          height: 40,
                           borderWidth: 4,
                           borderColor: "white",
                           aspectRatio: 1,
@@ -238,12 +232,6 @@ const Leaderboard = ({ route }) => {
                         }}>
                         <Text
                           style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            height: "100%",
-                            width: "100%",
                             fontSize: 13,
                             fontFamily: "Kanit-Bold",
                             textAlign: "center",
@@ -256,8 +244,7 @@ const Leaderboard = ({ route }) => {
                         style={{
                           width: 60,
                         }}>
-                        <Avatar user={user}
-                        />
+                        <Avatar user={user} />
                       </View>
                       <View
                         style={{
@@ -265,20 +252,15 @@ const Leaderboard = ({ route }) => {
                           flexDirection: "column",
                           justifyContent: "center",
                           alignItems: "flex-start",
-                          gap: 2,
                         }}>
-                        <View
-                          style={{
-                            width: "100%",
-                            flexDirection: "row",
-                            justifyContent: "flex-start",
-                            alignItems: "center",
-                            gap: 10,
-                          }}>
-                          <Text selectable={false} style={styles.usernameTitle}>
-                            {user.username}
-                          </Text>
-                        </View>
+                        <Text selectable={false} style={styles.usernameTitle}>
+                          {user.username}
+                        </Text>
+                        <Text
+                          selectable={false}
+                          style={styles.leaderboardLevel}>
+                          Level {user.rank}
+                        </Text>
                       </View>
                     </View>
                     <View
