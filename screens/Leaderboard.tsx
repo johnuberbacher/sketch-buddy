@@ -11,21 +11,17 @@ import {
 import { supabase } from "../lib/supabase";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import Nav from "../components/Nav";
-import NewButton from "../components/NewButton";
+import Button from "../components/Button";
 import COLORS from "../constants/colors";
 import Avatar from "../components/Avatar";
 import { useNavigation } from "@react-navigation/native";
 import { Session } from "@supabase/supabase-js";
-import ChooseWord from "../components/ChooseWord";
+import ChooseWord from "../components/modals/ChooseWord";
 import Modal from "../components/Modal";
-import CreateGame from "../components/CreateGame";
+import CreateGame from "../components/modals/CreateGame";
 import Settings from "../components/Settings";
 import {
-  fetchUserProfile,
   fetchAllUsers,
-  fetchUsers,
-  fetchUserData,
-  updateUserData,
 } from "../util/DatabaseManager";
 
 const Leaderboard = ({ route }) => {
@@ -208,7 +204,7 @@ const Leaderboard = ({ route }) => {
                         flexDirection: "row",
                         justifyContent: "flex-start",
                         alignItems: "center",
-                        gap: 20,
+                        gap: 15,
                         flex: 1,
                       }}>
                       <View
@@ -269,11 +265,11 @@ const Leaderboard = ({ route }) => {
                         width: "auto",
                         flexDirection: "column",
                       }}>
-                      <NewButton
+                      <Button
                         title="Play"
                         size="small"
                         onPress={() => {
-                          createNewGame(user);
+                         null
                         }}
                         color="green"
                       />
@@ -319,7 +315,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     backgroundColor: "#feeede",
     borderRadius: 15,
-    gap: 20,
+    gap: 15,
   },
   usernameTitle: {
     fontSize: 16,

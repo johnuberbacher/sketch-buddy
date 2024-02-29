@@ -104,9 +104,6 @@ const styles = StyleSheet.create({
     height: "auto",
     padding: 20,
     gap: 20,
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
     backgroundColor: "rgba(255,255,255,1.0)",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,1.0)",
@@ -124,6 +121,9 @@ const styles = StyleSheet.create({
     fontFamily: "Kanit-SemiBold",
     color: COLORS.text,
     textAlign: "center",
+    paddingTop: 5,
+    paddingHorizontal: 10,
+    lineHeight: 30,
   },
 });
 

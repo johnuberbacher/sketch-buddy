@@ -8,7 +8,7 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import NewButton from "./NewButton";
+import Button from "./Button";
 import COLORS from "../constants/colors";
 import { supabase } from "../lib/supabase";
 import { useNavigation } from "@react-navigation/native";
@@ -255,7 +255,7 @@ const Settings = ({ onClose, user }) => {
                     }}></View>
                 </>
               )}
-              {/*<NewButton
+              {/*<Button
                 color="secondary"
                 size="small"
                 title={uploading ? "Uploading ..." : "Upload Image"}
@@ -290,7 +290,7 @@ const Settings = ({ onClose, user }) => {
                 flexDirection: "row",
                 gap: 20,
               }}>
-              <NewButton
+              <Button
                 color="secondary"
                 title="Mute Audio Off"
                 onPress={() => null}
@@ -302,7 +302,7 @@ const Settings = ({ onClose, user }) => {
                 flexDirection: "row",
                 gap: 20,
               }}>
-              <NewButton
+              <Button
                 color="secondary"
                 title="Sign Out"
                 onPress={() => supabase.auth.signOut()}
@@ -326,7 +326,7 @@ const Settings = ({ onClose, user }) => {
                   flex: 1,
                   flexDirection: "row",
                 }}>
-                <NewButton
+                <Button
                   color="primary"
                   title="Close"
                   onPress={() => onClose()}

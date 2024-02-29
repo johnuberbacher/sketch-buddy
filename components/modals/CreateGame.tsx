@@ -8,14 +8,14 @@ import {
   Alert,
   RefreshControl,
 } from "react-native";
-import NewButton from "../components/NewButton";
+import Button from "../Button";
 import React, { useState, useEffect } from "react";
-import Avatar from "../components/Avatar";
-import COLORS from "../constants/colors";
+import Avatar from "../Avatar";
+import COLORS from "../../constants/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
-import { supabase } from "../lib/supabase";
-import { fetchAllUsers, createGame } from "../util/DatabaseManager";
+import { supabase } from "../../lib/supabase";
+import { fetchAllUsers, createGame } from "../../util/DatabaseManager";
 
 const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,7 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
   useEffect(() => {
     const playSound = async () => {
       const { sound } = await Audio.Sound.createAsync(
-        require("./../assets/sfx/dialog.mp3")
+        require("../../assets/sfx/dialog.mp3")
       );
       await sound.playAsync();
     };
@@ -158,7 +158,7 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
                         justifyContent: "flex-start",
                         alignItems: "flex-start",
                       }}>
-                      <NewButton
+                      <Button
                         title="Play"
                         size="small"
                         onPress={() => {
@@ -177,7 +177,7 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
                 height: "auto",
                 flexDirection: "row",
               }}>
-              <NewButton
+              <Button
                 color="primary"
                 title="Close"
                 onPress={() => {

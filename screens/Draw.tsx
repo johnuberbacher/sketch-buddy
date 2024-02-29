@@ -1,7 +1,7 @@
 import { Text, ScrollView, View } from "react-native";
 import React, { useEffect, useState, useLayoutEffect } from "react";
 import Canvas from "../components/Canvas";
-import ConfirmDialog from "../components/ConfirmDialog";
+import ConfirmDialog from "../components/modals/ConfirmDialog";
 import Modal from "../components/Modal";
 import Loading from "../components/Loading";
 import { supabase } from "../lib/supabase";
@@ -169,13 +169,13 @@ const Draw = ({ route, navigation }) => {
                     Drawing{" "}
                     <Text
                       selectable={false}
-                      style={{ fontFamily: "Kanit-Bold" }}>
+                      style={{ fontFamily: "Kanit-Bold", textTransform: "uppercase" }}>
                       {game.word}
                     </Text>{" "}
                     for{" "}
                     <Text
                       selectable={false}
-                      style={{ fontFamily: "Kanit-Bold" }}>
+                      style={{ fontFamily: "Kanit-Medium" }}>
                       {opponent.username}
                     </Text>
                   </Text>

@@ -1,58 +1,60 @@
-import { TouchableHighlight, View, Text, StyleSheet } from "react-native";
+import {
+  TouchableHighlight,
+  View,
+  Text,
+  StyleSheet,
+  ImageBackground,
+  TouchableOpacity,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import COLORS from "../constants/colors";
 import { Audio } from "expo-av";
-
+import { LinearGradient } from "expo-linear-gradient";
 const Button = (props) => {
-  const baseColor = COLORS[props.color] || COLORS.red;
-  const darkColor = COLORS[`${props.color}Dark`] || COLORS.redDark;
   const [isPressed, setIsPressed] = useState(false);
   const [sound, setSound] = useState();
 
-  useEffect(() => {
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [sound]);
+  const buttonInnerStyle = StyleSheet.flatten([
+    styles.buttonInner,
+    {
+      paddingTop: props.size === "small" ? 5 : 15,
+      paddingBottom: props.size === "small" ? 5 : 15,
+    },
+  ]);
+
+  const buttonTextStyle = StyleSheet.flatten([
+    styles.buttonText,
+    {
+      fontSize: props.size === "small" ? 16 : 20,
+    },
+  ]);
 
   const handlePressIn = async () => {
     setIsPressed(true);
     const { sound } = await Audio.Sound.createAsync(
-      require("./../assets/sfx/sfx01.mp3")
+      require("./../assets/sfx/click.mp3")
     );
-    setSound(sound);
     await sound.playAsync();
   };
 
   const handlePressOut = () => {
     setIsPressed(false);
   };
-  const buttonInnerStyles = StyleSheet.flatten([
-    styles.buttonInner,
-    isPressed && !props.selected && styles.buttonInnerPressed,
-    props.selected && styles.buttonInnerSelected,
-    {
-      height: props.buttonSize || 60,
-      backgroundColor: props.selected ? props.selected : baseColor,
-    },
-  ]);
 
-  const buttonOuterStyles = StyleSheet.flatten([
-    styles.buttonOuter,
-    isPressed && !props.selected && styles.buttonOuterPressed,
-    props.selected && styles.buttonOuterSelected,
-    {
-      backgroundColor: props.selected ? props.selected : darkColor,
-    },
-  ]);
+  const getColorArray = () => {
+    const color = props.color ? COLORS[props.color] : COLORS.secondary;
+    const colorDark = props.color
+      ? COLORS[props.color + "Dark"]
+      : COLORS.secondaryDark;
+
+    return [color, colorDark];
+  };
 
   return (
-    <TouchableHighlight
-      activeOpacity={1.0}
-      style={buttonOuterStyles}
-      disabled={props.selected}
+    <TouchableOpacity
+      activeOpacity={0.75}
+      style={styles.buttonOuter}
+      disabled={props.disabled || props.selected}
       onPress={() => {
         if (props.onPress) {
           props.onPress();
@@ -60,85 +62,55 @@ const Button = (props) => {
       }}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}>
-      <View style={buttonInnerStyles}>
-        <Text selectable={false} style={styles.buttonText}>
-          {props.title}
-        </Text>
-      </View>
-    </TouchableHighlight>
+      <LinearGradient
+        style={{ borderRadius: 40 }}
+        colors={getColorArray()}
+        start={{ x: 0.4, y: 0 }}
+        end={{ x: 0.6, y: 1 }}>
+        <View style={buttonInnerStyle}>
+          <Text selectable={false} style={buttonTextStyle}>
+            {props.title}
+          </Text>
+          {props.reward ? (
+            <View style={styles.buttonReward}>
+              {Array.from({ length: props.reward }, (_, index) => (
+                <ImageBackground
+                  style={{ width: 30, height: 30, marginLeft: -10 }}
+                  source={require("../assets/c.png")}
+                  resizeMode={"contain"}></ImageBackground>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      </LinearGradient>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   buttonOuter: {
     flex: 1,
-    backgroundColor: "#b93109",
-    paddingBottom: 10,
-    borderRadius: 15,
-    elevation: 2,
-  },
-  buttonOuterPressed: {
-    flex: 1,
-    backgroundColor: "#b93109",
-    paddingBottom: 3,
-    borderRadius: 15,
-    elevation: 2,
-  },
-  buttonOuterSelected: {
-    flex: 1,
-    backgroundColor: "#636d6f",
-    paddingBottom: 3,
-    borderRadius: 15,
-    elevation: 2,
+    overflow: "hidden",
   },
   buttonInner: {
-    flexDirection: "column",
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 15,
-    backgroundColor: "#f86134",
-    paddingTop: 10,
-    paddingBottom: 10,
     paddingLeft: 20,
     paddingRight: 20,
-    height: 70,
-    marginTop: -10,
     textTransform: "capitalize",
-  },
-  buttonInnerPressed: {
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 15,
-    backgroundColor: "#f86134",
-    height: 70,
-    paddingTop: 10,
-    paddingBottom: 10,
-    paddingLeft: 20,
-    paddingRight: 20,
-    marginTop: -3,
-  },
-  buttonInnerSelected: {
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 15,
-    backgroundColor: "#9da8ae",
-    height: 70,
-    paddingTop: 10,
-    paddingBottom: 10,
-    paddingLeft: 20,
-    paddingRight: 20,
-    marginTop: -3,
+    gap: 40,
   },
   buttonText: {
     color: "white",
-    fontSize: 24,
-    fontFamily: "TitanOne-Regular",
+    fontSize: 20,
+    fontFamily: "Kanit-SemiBold",
     textShadowColor: "rgba(0, 0, 0, 0.25)",
-    textShadowOffset: { width: 0, height: 3 },
+    textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
-    textTransform: "uppercase",
+  },
+  buttonReward: {
+    flexDirection: "row",
   },
 });
 

@@ -16,15 +16,22 @@ import LetterBoard from "../components/LetterBoard";
 import FlatButton from "../components/FlatButton";
 import Avatar from "../components/Avatar";
 import COLORS from "../constants/colors";
-import NewButton from "../components/NewButton";
+import Button from "../components/Button";
 import Modal from "../components/Modal";
-import RewardDialog from "../components/RewardDialog";
+import RewardDialog from "../components/modals/RewardDialog";
 import Loading from "../components/Loading";
+import GameOver from "../components/modals/GameOver";
 import { supabase } from "../lib/supabase";
 import { Svg, Path } from "react-native-svg";
-import { fetchGameData, updateUserData } from "../util/DatabaseManager";
+import {
+  fetchGameData,
+  updateGameData,
+  updateUserCoins,
+  updateUserData,
+} from "../util/DatabaseManager";
 
 const Guess = ({ route, navigation }) => {
+  const [isGameOverDialogVisible, setIsGameOverDialogVisible] = useState(false);
   const [isRewardDialogVisible, setIsRewardDialogVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [drawingPaths, setDrawingPaths] = useState([]);
@@ -40,6 +47,18 @@ const Guess = ({ route, navigation }) => {
     "Your guesswork is quite the masterpiece, drawing in correctness!",
     "That's the sketch of it – you're absolutely right!",
     "Your mental sketchpad is filled with the right answers!",
+  ];
+  const gameovers = [
+    "Looks like your artistry took a detour into the abstract game over zone!",
+    "Your sketching skills are on vacation – better luck next canvas!",
+    "Your masterpiece will have to wait for a sequel!",
+    "Time to sharpen those pencils, because that last attempt was a bit sketchy!",
+    "Don't worry, even Da Vinci had off days. This was just your doodle moment.",
+    "Your drawing board might need a motivational speech.",
+    "Seems like your art just went for a coffee break. Try not to spill any creativity next time!",
+    "Oops! Your drawing just pulled a Houdini – disappeared without a trace!",
+    "Your art critics are on strike; time to win them back with your next stroke.",
+    "Well, that didn't sketch out as planned. Time for a redraw!",
   ];
 
   useEffect(() => {
@@ -71,90 +90,67 @@ const Guess = ({ route, navigation }) => {
     });
   }
 
-  async function updateUserStats() {
-    const reward =
-      game.difficulty === "easy" ? 1 : game.difficulty === "medium" ? 2 : 3;
-
-    // Update User
-    const { data, error } = await updateUserData(user.id, {
-      coins: user.coins + reward,
-    });
-    if (error) {
-      console.error("Error updating user:", error);
-    } else {
-      setLoading(false);
-    }
-
-    // Update Opponent
-    await updateUserData(opponent.id, { coins: opponent.coins + reward }).then(
-      ({ data, error }) => {
-        if (error) {
-          console.error("Error updating opponent:", error);
-        } else {
-          setLoading(false);
-        }
-      }
-    );
-  }
-
-  async function updateGameTurn() {
-    try {
-      const gameData = await supabase
-        .from("games")
-        .select("streak")
-        .eq("id", game.id)
-        .limit(1)
-        .single();
-
-      if (gameData.error) {
-        throw new Error(
-          `Error fetching game ${game.id}: ${gameData.error.message}`
-        );
-      }
-
-      const turn = game.user1 === user.id ? game.user2 : game.user1;
-      const streak = gameData.data.streak + 1;
-
-      const { data, error } = await supabase
-        .from("games")
-        .update({
-          word: null,
-          turn: turn,
-          action: "draw",
-          streak: streak,
-        })
-        .eq("id", game.id);
-
-      if (error) {
-        throw new Error("Error updating game turn");
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(error.message);
-      }
-    }
-  }
+  async function updateGameTurn() {}
 
   const handleGuessCorrect = async () => {
     setLoading(true);
-    updateUserStats();
-    updateGameTurn();
-    setIsRewardDialogVisible(true);
+
+    // const turn = game.user1 === user.id ? game.user2 : game.user1;
+    const streak = game.streak + 1;
+    const reward =
+      game.difficulty === "easy" ? 1 : game.difficulty === "medium" ? 2 : 3;
+
+    // Update user
+    await updateUserCoins(user.id, user.coins + reward).then(
+      ({ data, error }) => {
+        if (error) {
+          console.error("Error updating user:", error);
+        }
+      }
+    );
+
+    // Update opponent
+    await updateUserCoins(opponent.id, opponent.coins + reward).then(
+      ({ data, error }) => {
+        if (error) {
+          console.error("Error updating opponent:", error);
+        }
+      }
+    );
+
+    // Update streak, game action to 'draw', and keep the turn the same
+    await updateGameData(game.id, { streak: streak, action: "draw", word: null }).then(
+      ({ data, error }) => {
+        if (error) {
+          console.error("Error updating game action:", error);
+        }
+      }
+    );
+
     setLoading(false);
+    setIsRewardDialogVisible(true);
+  };
+
+  const handleGameOver = async () => {
+    setLoading(true);
+
+    // Set streak to 0, game action to 'draw', and keep the turn the same
+    await updateGameData(game.id, { streak: 0, action: "draw", word: null }).then(
+      ({ data, error }) => {
+        if (error) {
+          console.error("Error updating game action:", error);
+        }
+      }
+    );
+
+    setLoading(false);
+    setIsGameOverDialogVisible(true);
   };
 
   const handleRequestHelp = async () => {
     // check if enough coins
     // remove letters
     // remove coins
-  };
-
-  const onContinuePlaying = () => {
-    setIsRewardDialogVisible(false);
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Home" }],
-    });
   };
 
   const onRewardDialog = () => {
@@ -165,9 +161,25 @@ const Guess = ({ route, navigation }) => {
     });
   };
 
+  const onClose = () => {
+    setIsRewardDialogVisible(false);
+    setIsGameOverDialogVisible(false);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Home" }],
+    });
+  };
+
   return (
     <>
       {loading && <Loading />}
+      {isGameOverDialogVisible && (
+        <Modal
+          props=""
+          title={gameovers[Math.floor(Math.random() * gameovers.length)]}>
+          <GameOver user={user} opponent={opponent} onClose={() => onClose()} />
+        </Modal>
+      )}
       {isRewardDialogVisible && (
         <Modal
           props=""
@@ -175,8 +187,7 @@ const Guess = ({ route, navigation }) => {
           <RewardDialog
             user={user}
             opponent={opponent}
-            onContinuePlaying={() => onRewardDialog()}
-            onClose={() => onRewardDialog()}
+            onClose={() => onClose()}
             difficulty={game.difficulty}
           />
         </Modal>
@@ -355,19 +366,17 @@ const Guess = ({ route, navigation }) => {
                   flexDirection: "row",
                   gap: 10,
                 }}>
-                <NewButton
+                <Button
                   color="primary"
                   title="Give up"
-                  onPress={() => {
-                    //
-                  }}
+                  onPress={() => handleGameOver()}
                 />
                 <View
                   style={{
                     width: "65%",
                     flexDirection: "row",
                   }}>
-                  <NewButton
+                  <Button
                     title="I Need Help"
                     reward="2"
                     onPress={() => handleRequestHelp()}

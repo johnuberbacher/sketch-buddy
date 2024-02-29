@@ -12,21 +12,19 @@ import {
 import { supabase } from "../lib/supabase";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import Nav from "../components/Nav";
-import NewButton from "../components/NewButton";
+import Button from "../components/Button";
 import COLORS from "../constants/colors";
 import Avatar from "../components/Avatar";
 import { useNavigation } from "@react-navigation/native";
 import { Session } from "@supabase/supabase-js";
-import ChooseWord from "../components/ChooseWord";
+import ChooseWord from "../components/modals/ChooseWord";
 import Modal from "../components/Modal";
-import CreateGame from "../components/CreateGame";
+import CreateGame from "../components/modals/CreateGame";
 import Settings from "../components/Settings";
 import {
   fetchUserProfile,
   fetchUserGames,
   fetchUsers,
-  fetchUserData,
-  updateUserData,
 } from "../util/DatabaseManager";
 
 const Home = ({ route }) => {
@@ -369,7 +367,7 @@ const Home = ({ route }) => {
                     My Games
                   </Text>
                   <View>
-                    <NewButton
+                    <Button
                       title="Leaderboard"
                       size="small"
                       onPress={() => {
@@ -490,9 +488,9 @@ const Home = ({ route }) => {
                               justifyContent: "flex-start",
                               alignItems: "flex-start",
                             }}>
-                            <NewButton
+                            <Button
                               title={
-                                game.action === "draw" ? "Draw!" : "Guess!"
+                                game.action === "draw" ? "Draw !" : "Guess !"
                               }
                               size="small"
                               onPress={() => {
@@ -514,7 +512,7 @@ const Home = ({ route }) => {
                     width: "100%",
                     flexDirection: "row",
                   }}>
-                  <NewButton
+                  <Button
                     color="secondary"
                     title="Create a New Game"
                     onPress={() => {

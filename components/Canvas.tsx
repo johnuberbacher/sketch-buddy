@@ -6,7 +6,7 @@ import {
   State,
 } from "react-native-gesture-handler";
 import { StyleSheet, View, Text } from "react-native";
-import NewButton from "./NewButton";
+import NewButton from "./Button";
 import CanvasTools from "./CanvasTools";
 import Avatar from "./Avatar";
 import FlatButton from "./FlatButton";

@@ -85,11 +85,37 @@ export const fetchGameData = async (gameId: string) => {
   }
 };
 
+// Update game data
+export const updateGameData = async (gameId: string, newData: Record<string, any>) => {  try {
+    const { data, error } = await supabase
+      .from("games")
+      .update(newData)
+      .eq("id", gameId);
+    return { data, error };
+  } catch (error) {
+    console.error("Error updating game data:", error);
+    return { data: null, error };
+  }
+};
+
 // Update user data
 export const updateUserData = async (userId: string, newData: Record<string, any>) => {  try {
     const { data, error } = await supabase
-      .from("users")
-      .update(newData)
+      .from("profiles")
+      .upsert(newData)
+      .eq("id", userId);
+    return { data, error };
+  } catch (error) {
+    console.error("Error updating user data:", error);
+    return { data: null, error };
+  }
+};
+
+// Update user coins
+export const updateUserCoins = async (userId: string, coins: Number) => {  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({"coins": coins})
       .eq("id", userId);
     return { data, error };
   } catch (error) {
