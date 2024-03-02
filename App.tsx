@@ -5,10 +5,9 @@ import {
   StatusBar,
   View,
   StyleSheet,
-  Text,
   LogBox,
   ImageBackground,
-  TouchableOpacity,
+  Touchable,
 } from "react-native";
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -19,17 +18,19 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import Home from "./screens/Home";
-import Draw from "./screens/Draw";
-import Guess from "./screens/Guess";
-import Landing from "./screens/Landing";
-import SignUp from "./screens/SignUp";
-import Leaderboard from "./screens/Leaderboard";
-import COLORS from "./constants/colors";
-import FlatButton from "./components/FlatButton";
-import AudioPlayer from "./util/AudioPlayer";
-import { supabase } from "./lib/supabase";
+import Home from "./src/screens/Home";
+import Draw from "./src/screens/Draw";
+import Guess from "./src/screens/Guess";
+import Landing from "./src/screens/Landing";
+import Leaderboard from "./src/screens/Leaderboard";
+import COLORS from "./src/constants/colors";
+import AudioPlayer from "./src/util/AudioPlayer";
+import { supabase } from "./src/lib/supabase";
 import { Session } from "@supabase/supabase-js";
+import {
+  GestureHandlerRootView,
+  TouchableOpacity,
+} from "react-native-gesture-handler";
 
 const App = () => {
   const [audioFilesLoaded, setAudioFilesLoaded] = useState(true);
@@ -54,23 +55,17 @@ const App = () => {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const fetchSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setSession(session);
-    });
+    };
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    const onAuthStateChanged = (_event, session) => {
       setSession(session);
-    });
-  }, []);
+    };
 
-  const Stack = createNativeStackNavigator();
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded && audioFilesLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded, audioFilesLoaded]);
-
-  useEffect(() => {
     const hideSplash = async () => {
       try {
         await SplashScreen.preventAutoHideAsync();
@@ -79,23 +74,18 @@ const App = () => {
       }
     };
 
+    supabase.auth.onAuthStateChange(onAuthStateChanged);
+
+    fetchSession();
     hideSplash();
   }, []);
 
-  useEffect(() => {
-    const fetchSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setSession(session);
-    };
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    fetchSession();
-  }, []);
+  const Stack = createNativeStackNavigator();
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded && audioFilesLoaded) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, audioFilesLoaded]);
 
   if (!fontsLoaded || !audioFilesLoaded) {
     return null;
@@ -115,9 +105,6 @@ const App = () => {
           barStyle="dark-content"
           animated={true}
           backgroundColor={COLORS.secondary}
-        />
-        <AudioPlayer
-          source={require(/* webpackPreload: true */ "./assets/music/Catwalk.wav")}
         />
         <View style={styles.mainContainer}>
           <ImageBackground
@@ -144,7 +131,27 @@ const App = () => {
                     key: session.user.id,
                     session: session,
                   }}
-                  options={{ headerShown: false }}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: "transparent",
+                    },
+                    headerTitle: "",
+                    headerLeft: () => (
+                      <GestureHandlerRootView>
+                        <TouchableOpacity
+                          onPress={() => {
+                            // Handle TouchableOpacity press
+                            // props.navigation.setParams({ showModal: true });
+                          }}>
+                          <MaterialCommunityIcons
+                            name="menu"
+                            size={30}
+                            color={COLORS.text}
+                          />
+                        </TouchableOpacity>
+                      </GestureHandlerRootView>
+                    ),
+                  }}
                 />
                 <Stack.Screen
                   name="Draw"
@@ -168,7 +175,27 @@ const App = () => {
                     key: session.user.id,
                     session: session,
                   }}
-                  options={{ headerShown: false }}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: "transparent",
+                    },
+                    headerTitle: "",
+                    headerLeft: () => (
+                      <GestureHandlerRootView>
+                        <TouchableOpacity
+                          onPress={() => {
+                            // Handle TouchableOpacity press
+                            // props.navigation.setParams({ showModal: true });
+                          }}>
+                          <MaterialCommunityIcons
+                            name="menu"
+                            size={30}
+                            color={COLORS.text}
+                          />
+                        </TouchableOpacity>
+                      </GestureHandlerRootView>
+                    ),
+                  }}
                 />
               </Stack.Navigator>
             ) : (
@@ -182,6 +209,11 @@ const App = () => {
 };
 
 const styles = StyleSheet.create({
+  header: {
+    width: "100%",
+    paddingHorizontal: 20,
+    marginHorizontal: 0,
+  },
   container: {
     height: "100%",
     flex: 1,
