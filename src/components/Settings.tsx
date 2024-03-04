@@ -138,6 +138,7 @@ const Settings = ({ onClose, user }) => {
       if (data) {
         console.log("Image uploaded", data.path);
         setAvatarUrl(data.path);
+        setButtonText("Save");
         await updateUserAvatar(user, path);
         await getProfile();
       }

@@ -3,24 +3,17 @@ import {
   View,
   Text,
   ActivityIndicator,
+  TouchableOpacity,
   StyleSheet,
-  ImageBackground,
-  Alert,
-  RefreshControl,
 } from "react-native";
-import { supabase } from "../lib/supabase";
-import React, { useState, useEffect, useLayoutEffect } from "react";
-import Nav from "../components/Nav";
-import Button from "../components/Button";
+import React, { useState, useEffect } from "react";
 import COLORS from "../constants/colors";
 import Avatar from "../components/Avatar";
 import { useNavigation } from "@react-navigation/native";
-import { Session } from "@supabase/supabase-js";
-import ChooseWord from "../components/modals/ChooseWord";
 import Modal from "../components/Modal";
-import CreateGame from "../components/modals/CreateGame";
 import Settings from "../components/Settings";
 import { fetchAllUsers } from "../util/DatabaseManager";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const Leaderboard = ({ route }) => {
   const { key, session } = route.params;
@@ -93,12 +86,24 @@ const Leaderboard = ({ route }) => {
               <Settings onClose={() => setIsSettingsVisibleModal(false)} />
             </Modal>
           )}
+          <View style={styles.header}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.goBack();
+              }}>
+              <MaterialCommunityIcons
+                name="keyboard-backspace"
+                size={30}
+                color={COLORS.text}
+              />
+            </TouchableOpacity>
+            <></>
+          </View>
           <ScrollView
+            overScrollMode="never"
+            alwaysBounceVertical={false}
             style={styles.scrollView}
-            contentContainerStyle={styles.scrollViewContent}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }>
+            contentContainerStyle={styles.scrollViewContent}>
             <View style={styles.mainContainer}>
               <View style={styles.headerContainer}>
                 <Text style={styles.headerText}>Leaderboards</Text>
@@ -107,18 +112,36 @@ const Leaderboard = ({ route }) => {
                 <View style={styles.topUsersContainer}>
                   {topUsersData.map((user, index) => (
                     <View key={index} style={styles.topUserItem}>
-                    <View
-                      style={{
-                        width: 60,
-                      }}>
-                      <Avatar user={user} />
-                    </View>
-                      <View style={styles.rankContainer}>
-                        <Text style={styles.rankText}>{index + 1}</Text>
+                      <View
+                        style={[
+                          styles.topUserItemAvatar,
+                          index === 1
+                            ? styles.topUserItemAvatarFirstPlace
+                            : null,
+                        ]}>
+                        <Avatar user={user} />
+                      </View>
+                      <View
+                        style={[
+                          styles.topUserItemRankContainer,
+                          index === 1 ? styles.rankContainerFirstPlace : null,
+                        ]}>
+                        <Text style={styles.rankText}>
+                          {index === 0
+                            ? 2
+                            : index === 1
+                            ? 1
+                            : index === 2
+                            ? 3
+                            : ""}
+                        </Text>
                       </View>
                       <Text style={styles.usernameTitle}>{user.username}</Text>
                       <Text style={styles.leaderboardLevel}>
                         Level {user.rank}
+                      </Text>
+                      <Text style={styles.leaderboardLevel}>
+                        {user.wins} wins
                       </Text>
                     </View>
                   ))}
@@ -126,12 +149,16 @@ const Leaderboard = ({ route }) => {
                 {usersData.map((user, index) => (
                   <View key={user.id} style={styles.menuInner}>
                     <View style={styles.userDetailsContainer}>
-                      <View style={styles.rankContainer}>
+                      <View
+                        style={[
+                          styles.rankContainer,
+                          index === 0 ? styles.rankContainerFirstPlace : null,
+                        ]}>
                         <Text style={styles.rankText}>{index + 1}</Text>
                       </View>
                       <View
                         style={{
-                          width: 60,
+                          width: 50,
                         }}>
                         <Avatar user={user} />
                       </View>
@@ -139,23 +166,19 @@ const Leaderboard = ({ route }) => {
                         <Text style={styles.usernameTitle}>
                           {user.username}
                         </Text>
-                        <Text style={styles.leaderboardLevel}>
-                          Level {user.rank}
-                        </Text>
+                        <View style={{ flexDirection: "row", justifyContent: "flex-start", gap: 10, }}>
+                          <Text style={styles.leaderboardLevel}>
+                            Level {user.rank}
+                          </Text>
+                          <Text style={styles.leaderboardLevel}>
+                          •
+                          </Text>
+                          <Text style={styles.leaderboardLevel}>
+                          {user.wins} wins
+                          </Text>
+                        </View>
                       </View>
                     </View>
-                    {user.id !== session.user.id ? (
-                      <View style={styles.buttonContainer}>
-                        <Button
-                          title="Play"
-                          size="small"
-                          onPress={() => {
-                            null;
-                          }}
-                          color="green"
-                        />
-                      </View>
-                    ) : null}
                   </View>
                 ))}
               </View>
@@ -167,7 +190,16 @@ const Leaderboard = ({ route }) => {
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
+  header: {
+    width: "100%",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    marginHorizontal: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   loadingContainer: {
     flex: 1,
     backgroundColor: "transparent",
@@ -254,6 +286,25 @@ const styles = {
     flexDirection: "column",
     alignItems: "center",
   },
+  topUserItemAvatar: {
+    width: 80,
+  },
+  topUserItemAvatarFirstPlace: {
+    width: 100,
+  },
+  topUserItemRankContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: COLORS.secondary,
+    overflow: "hidden",
+    borderRadius: 200,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 4,
+    borderColor: "white",
+    marginTop: -15,
+  },
   rankContainer: {
     width: 40,
     height: 40,
@@ -266,6 +317,9 @@ const styles = {
     borderWidth: 4,
     borderColor: "white",
   },
+  rankContainerFirstPlace: {
+    backgroundColor: COLORS.primary,
+  },
   rankText: {
     fontSize: 13,
     fontFamily: "Kanit-Bold",
@@ -277,7 +331,7 @@ const styles = {
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
-    gap: 15,
+    gap: 10,
     flex: 1,
   },
   userDetails: {
@@ -302,6 +356,6 @@ const styles = {
     color: COLORS.text,
     opacity: 0.5,
   },
-};
+});
 
 export default Leaderboard;

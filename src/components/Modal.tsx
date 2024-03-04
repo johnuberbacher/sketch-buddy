@@ -70,7 +70,7 @@ const Modal = ({ props, title, children }) => {
                 width: "100%",
                 height: "auto",
               }}>
-              <ScrollView
+              <ScrollView overScrollMode="never" alwaysBounceVertical={false}
                 contentContainerStyle={{
                   height: "auto",
                   padding: 0,

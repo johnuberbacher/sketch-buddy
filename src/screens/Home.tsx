@@ -5,20 +5,15 @@ import {
   ActivityIndicator,
   StyleSheet,
   ImageBackground,
-  Alert,
   StatusBar,
   Animated,
   RefreshControl,
   TouchableOpacity,
 } from "react-native";
-import { supabase } from "../lib/supabase";
-import React, { useRef, useState, useEffect, useLayoutEffect } from "react";
-import Nav from "../components/Nav";
+import React, { useRef, useState, useEffect } from "react";
 import Button from "../components/Button";
 import COLORS from "../constants/colors";
 import Avatar from "../components/Avatar";
-import { useNavigation } from "@react-navigation/native";
-import { Session } from "@supabase/supabase-js";
 import ChooseWord from "../components/modals/ChooseWord";
 import Modal from "../components/Modal";
 import CreateGame from "../components/modals/CreateGame";
@@ -144,27 +139,6 @@ const Home = ({ navigation, route, openSettingsModal }) => {
     fetchData();
   }, []);
 
-  const pulseAnimation = useRef(new Animated.Value(1)).current;
-
-  const startPulseAnimation = () => {
-    Animated.sequence([
-      Animated.timing(pulseAnimation, {
-        toValue: 1.1,
-        duration: 500,
-        useNativeDriver: false,
-      }),
-      Animated.timing(pulseAnimation, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: false,
-      }),
-    ]).start(() => startPulseAnimation());
-  };
-
-  useEffect(() => {
-    startPulseAnimation();
-  }, []);
-
   return (
     <>
       <StatusBar translucent backgroundColor="transparent" />
@@ -204,7 +178,21 @@ const Home = ({ navigation, route, openSettingsModal }) => {
               />
             </Modal>
           )}
-          <ScrollView
+          <View style={styles.header}>
+            <TouchableOpacity
+              onPress={() => {
+                setIsSettingsVisibleModal(true);
+              }}>
+              <MaterialCommunityIcons
+                name="menu"
+                size={30}
+                color={COLORS.text}
+              />
+            </TouchableOpacity>
+            <></>
+          </View>
+          <ScrollView overScrollMode="never"
+            alwaysBounceVertical={false}
             style={styles.scrollView}
             contentContainerStyle={styles.scrollContentContainer}
             refreshControl={
@@ -302,7 +290,6 @@ const Home = ({ navigation, route, openSettingsModal }) => {
                             flexDirection: "column",
                             justifyContent: "flex-start",
                             alignItems: "flex-start",
-                            transform: [{ scale: pulseAnimation }],
                           }}>
                           <Button
                             title={game.action === "draw" ? "Draw" : "Guess"}
@@ -333,6 +320,15 @@ const Home = ({ navigation, route, openSettingsModal }) => {
 };
 
 const styles = StyleSheet.create({
+  header: {
+    width: "100%",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    marginHorizontal: 0, 
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   loadingContainer: {
     flex: 1,
     backgroundColor: "transparent",
@@ -486,11 +482,7 @@ const styles = StyleSheet.create({
     fontFamily: "Kanit-SemiBold",
     color: COLORS.text,
   },
-  leaderboardButton: {
-    view: {
-      width: "30%",
-    },
-  },
+  leaderboardButton: {},
   noGamesContainer: {
     width: "100%",
     flexDirection: "column",
@@ -516,8 +508,8 @@ const styles = StyleSheet.create({
   streakContainer: {
     alignItems: "center",
     justifyContent: "center",
-    height: 60,
-    width: 60,
+    height: 50,
+    width: 50,
     backgroundColor: COLORS.secondaryDark,
     borderRadius: 15,
     opacity: 0.75,
@@ -535,7 +527,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   avatarContainer: {
-    width: 60,
+    width: 50,
   },
   userInfoContainer: {
     width: "100%",

@@ -7,7 +7,6 @@ import Loading from "../components/Loading";
 import { supabase } from "../lib/supabase";
 import COLORS from "../constants/colors";
 import Avatar from "../components/Avatar";
-import { fetchGameData } from "../util/DatabaseManager";
 
 const Draw = ({ route, navigation }) => {
   const [isConfirmDialogVisible, setIsConfirmDialogVisible] = useState(false);
@@ -73,8 +72,7 @@ const Draw = ({ route, navigation }) => {
           />
         </Modal>
       )}
-      <ScrollView
-        scrollEnabled={false}
+      <ScrollView overScrollMode="never" alwaysBounceVertical={false}
         style={{ backgroundColor: "transparent" }}
         contentContainerStyle={styles.scrollViewContainer}>
         <View style={styles.container}>

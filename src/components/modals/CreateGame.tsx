@@ -26,7 +26,14 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
       if (error) {
         console.error("Error updating user data:", error);
       } else {
-        const sortedData = data.sort((a, b) => b.rank - a.rank);
+        // Assuming 'user' is defined somewhere in your code
+        const filteredData = data.filter(
+          (item) => item.id !== currentUserData.id
+        );
+
+        // Sorting the filtered data by rank
+        const sortedData = filteredData.sort((a, b) => b.rank - a.rank);
+
         setUsersData(sortedData);
       }
     });
@@ -97,6 +104,8 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
                 gap: 20,
               }}>
               <ScrollView
+                overScrollMode="never"
+                alwaysBounceVertical={false}
                 style={{ width: "100%" }}
                 contentContainerStyle={{
                   width: "100%",
@@ -149,24 +158,22 @@ const CreateGame = ({ currentUserData, onClose, onPlayGame }) => {
                         </View>
                       </View>
                     </View>
-                    {opponent.id !== currentUserData.id ? (
-                      <View
-                        style={{
-                          width: "auto",
-                          flexDirection: "column",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}>
-                        <Button
-                          title="Play"
-                          size="small"
-                          onPress={() => {
-                            challengeUser(opponent);
-                          }}
-                          color="green"
-                        />
-                      </View>
-                    ) : null}
+                    <View
+                      style={{
+                        width: "auto",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}>
+                      <Button
+                        title="Play"
+                        size="small"
+                        onPress={() => {
+                          challengeUser(opponent);
+                        }}
+                        color="green"
+                      />
+                    </View>
                   </View>
                 ))}
               </ScrollView>

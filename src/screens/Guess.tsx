@@ -1,31 +1,17 @@
-import {
-  SafeAreaView,
-  Platform,
-  StatusBar,
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  Image,
-  StyleSheet,
-  Animated,
-} from "react-native";
-import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
 import LetterBoard from "../components/LetterBoard";
-import FlatButton from "../components/FlatButton";
 import Avatar from "../components/Avatar";
 import COLORS from "../constants/colors";
-import Button from "../components/Button";
 import Modal from "../components/Modal";
 import RewardDialog from "../components/modals/RewardDialog";
 import Loading from "../components/Loading";
 import GameOver from "../components/modals/GameOver";
-import { supabase } from "../lib/supabase";
 import { Svg, Path } from "react-native-svg";
 import {
   fetchGameData,
   updateGameData,
+  updateUser,
   updateUserCoins,
 } from "../util/DatabaseManager";
 
@@ -92,22 +78,26 @@ const Guess = ({ route, navigation }) => {
       game.difficulty === "easy" ? 1 : game.difficulty === "medium" ? 2 : 3;
 
     // Update user
-    await updateUserCoins(user.id, user.coins + reward).then(
-      ({ data, error }) => {
-        if (error) {
-          console.error("Error updating user:", error);
-        }
+    await updateUser(user.id, [
+      { field: "coins", value: user.coins + reward },
+      { field: "wins", value: user.wins + 1 },
+      // Add more fields as needed
+    ]).then(({ data, error }) => {
+      if (error) {
+        console.error("Error updating user:", error);
       }
-    );
+    });
 
     // Update opponent
-    await updateUserCoins(opponent.id, opponent.coins + reward).then(
-      ({ data, error }) => {
-        if (error) {
-          console.error("Error updating opponent:", error);
-        }
+    await updateUser(opponent.id, [
+      { field: "coins", value: opponent.coins + reward },
+      { field: "wins", value: opponent.wins + 1 },
+      // Add more fields as needed
+    ]).then(({ data, error }) => {
+      if (error) {
+        console.error("Error updating opponent:", error);
       }
-    );
+    });
 
     // Update streak, game action to 'draw', and keep the turn the same
     await updateGameData(game.id, {
@@ -127,6 +117,26 @@ const Guess = ({ route, navigation }) => {
 
   const handleGameOver = async () => {
     setLoading(true);
+    
+    // Update user
+    await updateUser(user.id, [
+      { field: "losses", value: user.losses + 1 },
+      // Add more fields as needed
+    ]).then(({ data, error }) => {
+      if (error) {
+        console.error("Error updating user:", error);
+      }
+    });
+    
+    // Update opponent
+    await updateUser(opponent.id, [
+      { field: "losses", value: opponent.losses + 1 },
+      // Add more fields as needed
+    ]).then(({ data, error }) => {
+      if (error) {
+        console.error("Error updating opponent:", error);
+      }
+    });
 
     // Set streak to 0, game action to 'draw', and keep the turn the same
     await updateGameData(game.id, {
@@ -176,6 +186,8 @@ const Guess = ({ route, navigation }) => {
         </Modal>
       )}
       <ScrollView
+        overScrollMode="never"
+        alwaysBounceVertical={false}
         style={{ backgroundColor: "transparent" }}
         contentContainerStyle={styles.scrollViewContainer}>
         <View style={styles.container}>
@@ -191,8 +203,9 @@ const Guess = ({ route, navigation }) => {
                 </Text>
               </View>
             </View>
+
             <View style={styles.drawingContainer}>
-            <View style={styles.svgContainer}>
+              <View style={styles.svgContainer}>
                 <Svg style={styles.svg}>
                   {drawingPaths?.map((pathObject, pathIndex) => (
                     <Path
@@ -206,7 +219,7 @@ const Guess = ({ route, navigation }) => {
                   ))}
                 </Svg>
               </View>
-              </View>
+            </View>
 
             <View style={styles.letterBoardContainer}>
               <LetterBoard

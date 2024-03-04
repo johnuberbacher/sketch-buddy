@@ -4,20 +4,15 @@ import {
   View,
   ImageBackground,
   Text,
-  TextInput,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
 } from "react-native";
 import Button from "../components/Button";
-import { useLayoutEffect, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import COLORS from "../constants/colors";
 import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
 import { useNavigation } from "@react-navigation/native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import Modal from "../components/Modal";
-import Verify from "../components/modals/Verify";
 import TextField from "../components/input/Text";
 import Loading from "../components/Loading";
 import Verification from "../components/input/Verification";
@@ -53,15 +48,18 @@ const Landing = () => {
   async function signInWithEmail() {
     setLoading(true);
 
+    const userColors = ["#f86134", "#ade053", "#0e96c8", "#ffcd3a"];
+
     const { data, error } = await supabase.auth.signInWithOtp({
       email: email,
       options: {
         shouldCreateUser: true,
         data: {
-          username: `user#${Math.floor(Math.random() * 100000)
+          username: `user#${Math.floor(Math.random() * 1000)
             .toString()
-            .padStart(5, "0")}`,
+            .padStart(3, "0")}`,
           avatar_url: null,
+          color: userColors[Math.floor(Math.random() * userColors.length)],
         },
       },
     });
@@ -85,7 +83,10 @@ const Landing = () => {
   return (
     <>
       {loading && <Loading />}
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        overScrollMode="never"
+        alwaysBounceVertical={false}
+        contentContainerStyle={styles.container}>
         <View
           style={{
             flex: 1,

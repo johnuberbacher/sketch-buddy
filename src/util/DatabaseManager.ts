@@ -102,16 +102,22 @@ export const updateGameData = async (
   }
 };
 
-// Update user data
-export const updateUserData = async (
+// Update user data with dynamic fields
+export const updateUser = async (
   userId: string,
-  newData: Record<string, any>
+  updatesArray: Array<{ field: string; value: any }>
 ) => {
   try {
+    const updatesObject = updatesArray.reduce((acc, update) => {
+      acc[update.field] = update.value;
+      return acc;
+    }, {});
+
     const { data, error } = await supabase
       .from("profiles")
-      .upsert(newData)
+      .update(updatesObject)
       .eq("id", userId);
+
     return { data, error };
   } catch (error) {
     console.error("Error updating user data:", error);

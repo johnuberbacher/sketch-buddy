@@ -115,13 +115,8 @@ const App = () => {
               <Stack.Navigator
                 initialRouteName="Home"
                 screenOptions={{
-                  headerStyle: {
-                    backgroundColor: "transparent",
-                  },
+                  headerShown: false,
                   headerShadowVisible: false,
-                  cardStyle: {
-                    backgroundColor: "transparent",
-                  },
                   animation: "slide_from_right",
                 }}>
                 <Stack.Screen
@@ -131,27 +126,7 @@ const App = () => {
                     key: session.user.id,
                     session: session,
                   }}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: "transparent",
-                    },
-                    headerTitle: "",
-                    headerLeft: () => (
-                      <GestureHandlerRootView>
-                        <TouchableOpacity
-                          onPress={() => {
-                            // Handle TouchableOpacity press
-                            // props.navigation.setParams({ showModal: true });
-                          }}>
-                          <MaterialCommunityIcons
-                            name="menu"
-                            size={30}
-                            color={COLORS.text}
-                          />
-                        </TouchableOpacity>
-                      </GestureHandlerRootView>
-                    ),
-                  }}
+                  options={{ headerShown: false, }}
                 />
                 <Stack.Screen
                   name="Draw"
@@ -175,27 +150,7 @@ const App = () => {
                     key: session.user.id,
                     session: session,
                   }}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: "transparent",
-                    },
-                    headerTitle: "",
-                    headerLeft: () => (
-                      <GestureHandlerRootView>
-                        <TouchableOpacity
-                          onPress={() => {
-                            // Handle TouchableOpacity press
-                            // props.navigation.setParams({ showModal: true });
-                          }}>
-                          <MaterialCommunityIcons
-                            name="menu"
-                            size={30}
-                            color={COLORS.text}
-                          />
-                        </TouchableOpacity>
-                      </GestureHandlerRootView>
-                    ),
-                  }}
+                  options={{ headerShown: false }}
                 />
               </Stack.Navigator>
             ) : (
@@ -221,9 +176,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.secondary,
   },
   safeArea: {
-    paddingTop: 0,
     flex: 1,
     backgroundColor: COLORS.secondary,
+    paddingTop: Platform.OS === 'android' ? 60 : 0 ,
   },
   mainContainer: {
     backgroundColor: COLORS.secondary,
