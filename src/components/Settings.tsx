@@ -24,14 +24,16 @@ import {
 } from "../util/DatabaseManager";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import TextField from "./input/Text";
+import { useAudio } from "../util/AudioContext";
 
 interface Props {
+  onClose: () => void;
+  user: any; // replace 'any' with the actual type of 'user'
   size: number;
   url: string | null;
-  onClose: () => void;
 }
-
-const Settings = ({ onClose, user }) => {
+const Settings: React.FC<Props> = ({ onClose, user }) => {
+  const { isPlaying, muteAudio } = useAudio();
   const [loading, setLoading] = useState(false);
   const [currentUserData, setCurrentUserData] = useState([]);
   const navigation = useNavigation();
@@ -40,6 +42,7 @@ const Settings = ({ onClose, user }) => {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarImage, setAvatarImage] = useState("");
   const [buttonText, setButtonText] = useState("Close");
+  const [muteAudioText, setMuteAudioText] = useState("Music ON");
 
   useEffect(() => {
     if (user) getProfile();
@@ -159,42 +162,52 @@ const Settings = ({ onClose, user }) => {
     if (buttonText !== "Save") setButtonText("Save");
   }
 
-  async function saveClose() {
+  const toggleAudioMute = () => {
+    muteAudio();
+    muteAudioText === "Music ON"
+      ? setMuteAudioText("Music OFF")
+      : setMuteAudioText("Music ON");
+  };
 
+  async function saveClose() {
     if (username !== currentUserData.username) {
       setLoading(true);
       if (username.length > 3 && /[a-zA-Z0-9]/.test(username)) {
         await updateUsername(user, username);
-        
-        // Load games list
-        await fetchUserGames(currentUserData.id).then(async ({ data, error }) => {
-          if (error) {
-            console.error("Error updating user data:", error);
-          } else {
-            if (data) {
-              data.forEach(async (game) => {
-                const columnToUpdate =
-                  game.user1 === currentUserData.id ? "user1username" : "user2username";
-                const newUsername =
-                  game.user1 === currentUserData.id ? username : username;
-                // Update games with new username
-                try {
-                  const { data, error } = await supabase
-                    .from("games")
-                    .update({
-                      [columnToUpdate]: newUsername,
-                    })
-                    .eq("id", game.id);
 
-                  return { data, error };
-                } catch (error) {
-                  console.error("Error updating game data:", error);
-                  return { data: null, error };
-                }
-              });
+        // Load games list
+        await fetchUserGames(currentUserData.id).then(
+          async ({ data, error }) => {
+            if (error) {
+              console.error("Error updating user data:", error);
+            } else {
+              if (data) {
+                data.forEach(async (game) => {
+                  const columnToUpdate =
+                    game.user1 === currentUserData.id
+                      ? "user1username"
+                      : "user2username";
+                  const newUsername =
+                    game.user1 === currentUserData.id ? username : username;
+                  // Update games with new username
+                  try {
+                    const { data, error } = await supabase
+                      .from("games")
+                      .update({
+                        [columnToUpdate]: newUsername,
+                      })
+                      .eq("id", game.id);
+
+                    return { data, error };
+                  } catch (error) {
+                    console.error("Error updating game data:", error);
+                    return { data: null, error };
+                  }
+                });
+              }
             }
           }
-        });
+        );
 
         setLoading(false);
         onClose();
@@ -338,8 +351,8 @@ const Settings = ({ onClose, user }) => {
               <Button
                 size="small"
                 color="secondary"
-                title="Mute Audio Off"
-                onPress={() => null}
+                title={muteAudioText}
+                onPress={toggleAudioMute}
               />
             </View>
             <View

@@ -1,11 +1,13 @@
+// AudioPlayer.js
 import React, { useEffect, useState } from "react";
 import { Audio } from "expo-av";
+import { useAudioManager } from "./AudioManager";
 
 const AudioPlayer = ({ source }) => {
+  const { isMuted } = useAudioManager();
   const [sound, setSound] = useState();
 
   const onPlaybackStatusUpdate = (status) => {
-    // Check if the playback has finished and manually restart it
     if (status.didJustFinish && sound) {
       sound.replayAsync();
     }
@@ -18,6 +20,7 @@ const AudioPlayer = ({ source }) => {
         {
           shouldPlay: true,
           isLooping: true,
+          volume: isMuted ? 0 : 1, // Adjust volume based on mute state
         },
         onPlaybackStatusUpdate
       );
@@ -29,11 +32,9 @@ const AudioPlayer = ({ source }) => {
     return async () => {
       if (sound) {
         await sound.unloadAsync();
-        // Remove event listeners
-        sound.setOnPlaybackStatusUpdate(null);
       }
     };
-  }, [source]);
+  }, [source, isMuted]);
 
   return null;
 };

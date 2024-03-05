@@ -13,7 +13,6 @@ import { LinearGradient } from "expo-linear-gradient";
 
 const Button = (props) => {
   const [isPressed, setIsPressed] = useState(false);
-  const [sound, setSound] = useState();
 
   const buttonInnerStyle = StyleSheet.flatten([
     styles.buttonInner,

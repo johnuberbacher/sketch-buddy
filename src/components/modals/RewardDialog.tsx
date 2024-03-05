@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Button from "../Button";
 import React, { useState, useEffect } from "react";
 import Avatar from "../Avatar";
@@ -35,8 +36,17 @@ const RewardDialog = ({ user, opponent, difficulty, onClose }) => {
       ) : (
         <View style={styles.mainContainer}>
           <View style={styles.avatarContainer}>
-            <Avatar user={user} />
-            <Avatar user={opponent} />
+            <View style={styles.avatar}>
+              <Avatar user={user} />
+            </View>
+            <MaterialCommunityIcons
+              name="trophy-variant"
+              size={30}
+              color={COLORS.secondary}
+            />
+            <View style={styles.avatar}>
+              <Avatar user={opponent} />
+            </View>
           </View>
           <ProgressBar />
           <View style={styles.infoContainer}>
@@ -101,7 +111,10 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    gap: 40,
+    gap: 20,
+  },
+  avatar: {
+    width: 80,
   },
   infoContainer: {
     width: "100%",

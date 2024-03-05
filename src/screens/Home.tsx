@@ -24,6 +24,7 @@ import {
   fetchUsers,
 } from "../util/DatabaseManager";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Loading from "../components/Loading";
 
 const Home = ({ navigation, route, openSettingsModal }) => {
   // Accessing the parameters from initialParams
@@ -143,13 +144,7 @@ const Home = ({ navigation, route, openSettingsModal }) => {
     <>
       <StatusBar translucent backgroundColor="transparent" />
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator
-            size="large"
-            color="white"
-            style={styles.activityIndicator}
-          />
-        </View>
+        <Loading />
       ) : (
         <>
           {isCreateGameModalVisible && (
@@ -376,7 +371,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     position: "absolute",
     zIndex: 0,
-    right: 20,
+    right: 0,
     width: "50%",
     height: "auto",
     marginHorizontal: "auto",

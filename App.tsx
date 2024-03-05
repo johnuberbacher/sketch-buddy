@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
 import {
-  SafeAreaView,
   Platform,
   StatusBar,
   View,
@@ -11,30 +10,27 @@ import {
 } from "react-native";
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-
 import Home from "./src/screens/Home";
 import Draw from "./src/screens/Draw";
 import Guess from "./src/screens/Guess";
 import Landing from "./src/screens/Landing";
 import Leaderboard from "./src/screens/Leaderboard";
 import COLORS from "./src/constants/colors";
-import AudioPlayer from "./src/util/AudioPlayer";
 import { supabase } from "./src/lib/supabase";
 import { Session } from "@supabase/supabase-js";
-import {
-  GestureHandlerRootView,
-  TouchableOpacity,
-} from "react-native-gesture-handler";
+import { AudioProvider } from "./src/util/AudioContext";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Audio } from "expo-av";
 
-const App = () => {
+const App: React.FC = () => {
   const [audioFilesLoaded, setAudioFilesLoaded] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [fontsLoaded] = useFonts({
     "Kanit-Black": require(/* webpackPreload: true */ "./assets/fonts/Kanit-Black.ttf"),
     "Kanit-Bold": require(/* webpackPreload: true */ "./assets/fonts/Kanit-Bold.ttf"),
@@ -99,67 +95,71 @@ const App = () => {
     },
   };
   return (
-    <NavigationContainer theme={MyTheme} style={styles.container}>
-      <SafeAreaView style={styles.safeArea} onLayout={onLayoutRootView}>
-        <StatusBar
-          barStyle="dark-content"
-          animated={true}
-          backgroundColor={COLORS.secondary}
-        />
-        <View style={styles.mainContainer}>
-          <ImageBackground
-            source={require("./assets/bg.png")}
-            resizeMode={"cover"}
-            style={styles.innerContainer}>
-            {session && session.user ? (
-              <Stack.Navigator
-                initialRouteName="Home"
-                screenOptions={{
-                  headerShown: false,
-                  headerShadowVisible: false,
-                  animation: "slide_from_right",
-                }}>
-                <Stack.Screen
-                  name="Home"
-                  component={Home}
-                  initialParams={{
-                    key: session.user.id,
-                    session: session,
-                  }}
-                  options={{ headerShown: false, }}
-                />
-                <Stack.Screen
-                  name="Draw"
-                  component={Draw}
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="Guess"
-                  component={Guess}
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="Landing"
-                  component={Landing}
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="Leaderboard"
-                  component={Leaderboard}
-                  initialParams={{
-                    key: session.user.id,
-                    session: session,
-                  }}
-                  options={{ headerShown: false }}
-                />
-              </Stack.Navigator>
-            ) : (
-              <Landing />
-            )}
-          </ImageBackground>
-        </View>
-      </SafeAreaView>
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <NavigationContainer theme={MyTheme} style={styles.container}>
+        <SafeAreaView style={styles.safeArea} onLayout={onLayoutRootView}>
+          <AudioProvider>
+            <StatusBar
+              barStyle="dark-content"
+              animated={true}
+              backgroundColor={COLORS.secondary}
+            />
+            <View style={styles.mainContainer}>
+              <ImageBackground
+                source={require("./assets/bg.png")}
+                resizeMode={"cover"}
+                style={styles.innerContainer}>
+                {session && session.user ? (
+                  <Stack.Navigator
+                    initialRouteName="Home"
+                    screenOptions={{
+                      headerShown: false,
+                      headerShadowVisible: false,
+                      animation: "slide_from_right",
+                    }}>
+                    <Stack.Screen
+                      name="Home"
+                      component={Home}
+                      initialParams={{
+                        key: session.user.id,
+                        session: session,
+                      }}
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="Draw"
+                      component={Draw}
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="Guess"
+                      component={Guess}
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="Landing"
+                      component={Landing}
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="Leaderboard"
+                      component={Leaderboard}
+                      initialParams={{
+                        key: session.user.id,
+                        session: session,
+                      }}
+                      options={{ headerShown: false }}
+                    />
+                  </Stack.Navigator>
+                ) : (
+                  <Landing />
+                )}
+              </ImageBackground>
+            </View>
+          </AudioProvider>
+        </SafeAreaView>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 };
 
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.secondary,
-    paddingTop: Platform.OS === 'android' ? 60 : 0 ,
+    paddingTop: Platform.OS === "android" ? 0 : 0,
   },
   mainContainer: {
     backgroundColor: COLORS.secondary,

@@ -194,17 +194,6 @@ const LetterBoard = ({ game, onGuessCorrect, onGameOver }) => {
       // Update local game state
       game.requested_help = true;
 
-      // Log information about the game state
-      console.log(
-        "game.word contains all available letters, including the static word letters:"
-      );
-      console.log(game.word);
-
-      console.log(
-        "optionLetters are the letters that MUST be present, logging an array of letters:"
-      );
-      console.log(optionLetters);
-
       // Convert game.word to an array of letters
       const gameWordLetters = game.word.split("");
 
@@ -222,6 +211,12 @@ const LetterBoard = ({ game, onGuessCorrect, onGameOver }) => {
       // Shuffle and select 4 help letters
       const shuffledLetters = availableLetters.sort(() => Math.random() - 0.5);
       const helpLetters = shuffledLetters.slice(0, 4);
+      
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../../assets/sfx/coin.mp3")
+      );
+      await sound.playAsync();
 
       // Update isSelected state based on the selected help letters
       setIsSelected((prevSelectedStatus) => {
